@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function WallpaperDetailClient({ wallpaper, related }: Props) {
-  const { isOpen, countdown, isDownloading, item, openDownload, closeDownload, startDownload } = useDownload()
+  const { isOpen, countdown, canDownload, isDownloading, item, userType, openDownload, closeDownload, startDownload } = useDownload()
   const [authOpen, setAuthOpen] = useState(false)
 
   const handleDownload = () => {
@@ -138,6 +138,8 @@ export default function WallpaperDetailClient({ wallpaper, related }: Props) {
         item={item}
         countdown={countdown}
         isDownloading={isDownloading}
+        canDownload={canDownload}
+        userType={userType}
         onClose={closeDownload}
         onDownload={startDownload}
         onOpenAuth={() => { closeDownload(); setAuthOpen(true) }}

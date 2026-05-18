@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase, SUPABASE_URL } from '@/lib/supabase'
 import toast from 'react-hot-toast'
@@ -18,56 +18,66 @@ interface UseDownloadReturn {
   isOpen: boolean
   isDownloading: boolean
   countdown: number
+  canDownload: boolean
   item: DownloadItem | null
+  userType: 'guest' | 'free' | 'premium'
   openDownload: (item: DownloadItem) => void
   closeDownload: () => void
   startDownload: () => void
 }
 
 // Fetch timer duration from ad-settings edge function
-async function getTimerDuration(isGuest: boolean): Promise<number> {
+async function getTimerDuration(userType: 'guest' | 'free'): Promise<number> {
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/ad-settings`, {
       headers: {
         apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-        'x-user-type': isGuest ? 'guest' : 'free',
+        'x-user-type': userType,
       },
     })
-    if (!res.ok) return isGuest ? 5 : 0
+    if (!res.ok) throw new Error('fetch failed')
     const data = await res.json()
-    return isGuest
-      ? (data?.data?.guest_timer_duration ?? 5)
-      : (data?.data?.logged_in_timer_duration ?? 0)
+    return userType === 'guest'
+      ? (data?.data?.guest_timer_duration ?? 15)   // default 15s for guests
+      : (data?.data?.logged_in_timer_duration ?? 6) // default 6s for free users
   } catch {
-    return isGuest ? 5 : 0
+    // Fallback defaults if edge function unavailable
+    return userType === 'guest' ? 15 : 6
   }
 }
 
-// Increment download count in Supabase
+// Increment download count
 async function incrementDownloadCount(item: DownloadItem) {
   const table =
     item.type === 'wallpaper' ? 'wallpapers' :
     item.type === 'ringtone' ? 'ringtones' :
     'live_wallpapers'
-  const countCol =
-    item.type === 'wallpaper' ? 'download_count' : 'downloads_count'
+  const countCol = item.type === 'wallpaper' ? 'download_count' : 'downloads_count'
 
   try {
+    // Try RPC first
     await supabase.rpc('increment_download_count', {
       p_table: table,
       p_id: item.id,
       p_column: countCol,
     })
   } catch {
-    // Fallback: direct update if RPC not available
-    await supabase
+    // Fallback: raw increment
+    const { data: current } = await supabase
       .from(table)
-      .update({ [countCol]: supabase.rpc('increment', { x: 1 }) })
+      .select('*')
       .eq('id', item.id)
+      .single()
+    if (current) {
+      const row = current as Record<string, unknown>
+      const newCount = ((row[countCol] as number) || 0) + 1
+      const patch: Record<string, unknown> = {}
+      patch[countCol] = newCount
+      await supabase.from(table).update(patch).eq('id', item.id)
+    }
   }
 }
 
-// Trigger actual file download in browser
 function triggerDownload(url: string, filename: string) {
   const a = document.createElement('a')
   a.href = url
@@ -84,8 +94,23 @@ export function useDownload(): UseDownloadReturn {
   const [isOpen, setIsOpen] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
   const [countdown, setCountdown] = useState(0)
+  const [canDownload, setCanDownload] = useState(false)
   const [item, setItem] = useState<DownloadItem | null>(null)
-  const [timerReady, setTimerReady] = useState(false)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Determine user type
+  const userType: 'guest' | 'free' | 'premium' = !user
+    ? 'guest'
+    : isPremium
+    ? 'premium'
+    : 'free'
+
+  const clearTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }
 
   const openDownload = useCallback(async (newItem: DownloadItem) => {
     // Premium wallpaper requires login
@@ -94,56 +119,59 @@ export function useDownload(): UseDownloadReturn {
       return
     }
 
+    clearTimer()
     setItem(newItem)
     setIsOpen(true)
     setIsDownloading(false)
-    setTimerReady(false)
+    setCanDownload(false)
 
-    const isGuest = !user
-    const duration = isPremium ? 0 : await getTimerDuration(isGuest)
+    const currentUserType: 'guest' | 'free' | 'premium' = !user
+      ? 'guest'
+      : isPremium ? 'premium' : 'free'
 
-    if (duration > 0) {
-      setCountdown(duration)
-      // Start countdown
-      let remaining = duration
-      const interval = setInterval(() => {
-        remaining -= 1
-        setCountdown(remaining)
-        if (remaining <= 0) {
-          clearInterval(interval)
-          setTimerReady(true)
-        }
-      }, 1000)
-    } else {
+    // Premium: no timer, download immediately available
+    if (currentUserType === 'premium') {
       setCountdown(0)
-      setTimerReady(true)
+      setCanDownload(true)
+      return
     }
+
+    // Guest or Free: show timer
+    const duration = await getTimerDuration(currentUserType)
+    setCountdown(duration)
+    setCanDownload(false)
+
+    let remaining = duration
+    intervalRef.current = setInterval(() => {
+      remaining -= 1
+      setCountdown(remaining)
+      if (remaining <= 0) {
+        clearTimer()
+        setCountdown(0)
+        setCanDownload(true)
+      }
+    }, 1000)
   }, [user, isPremium])
 
   const closeDownload = useCallback(() => {
+    clearTimer()
     setIsOpen(false)
     setItem(null)
     setCountdown(0)
-    setTimerReady(false)
+    setCanDownload(false)
     setIsDownloading(false)
   }, [])
 
   const startDownload = useCallback(async () => {
-    if (!item || isDownloading) return
-    if (!timerReady && countdown > 0) {
-      toast.error(`Please wait ${countdown} seconds`)
-      return
-    }
+    if (!item || isDownloading || !canDownload) return
 
     setIsDownloading(true)
     try {
-      // Increment counter
       await incrementDownloadCount(item)
-
-      // Trigger download
-      const ext = item.type === 'ringtone' ? 'mp3' : item.type === 'live' ? 'mp4' : 'jpg'
+      const ext =
+        item.type === 'ringtone' ? 'mp3' :
+        item.type === 'live' ? 'mp4' : 'jpg'
       triggerDownload(item.url, `${item.slug}.${ext}`)
-
       toast.success('Download started!')
       closeDownload()
     } catch (err) {
@@ -152,7 +180,10 @@ export function useDownload(): UseDownloadReturn {
     } finally {
       setIsDownloading(false)
     }
-  }, [item, isDownloading, timerReady, countdown, closeDownload])
+  }, [item, isDownloading, canDownload, closeDownload])
 
-  return { isOpen, isDownloading, countdown, item, openDownload, closeDownload, startDownload }
+  return {
+    isOpen, isDownloading, countdown, canDownload, item,
+    userType, openDownload, closeDownload, startDownload,
+  }
 }
