@@ -15,6 +15,26 @@ interface Props {
   onOpenAuth?: () => void
 }
 
+// Circular progress SVG
+function CountdownCircle({ value, max, color }: { value: number; max: number; color: string }) {
+  const r = 18
+  const circ = 2 * Math.PI * r
+  const progress = max > 0 ? ((max - value) / max) : 1
+  return (
+    <svg width="44" height="44" viewBox="0 0 44 44" className="-rotate-90" style={{ flexShrink: 0 }}>
+      <circle cx="22" cy="22" r={r} fill="none" stroke="#374151" strokeWidth="3.5" />
+      <circle
+        cx="22" cy="22" r={r}
+        fill="none" stroke={color} strokeWidth="3.5"
+        strokeLinecap="round"
+        strokeDasharray={circ}
+        strokeDashoffset={circ * (1 - progress)}
+        style={{ transition: 'stroke-dashoffset 1s linear' }}
+      />
+    </svg>
+  )
+}
+
 export default function DownloadModal({
   isOpen, item, countdown, canDownload, isDownloading,
   userType, onClose, onDownload, onOpenAuth
@@ -29,136 +49,180 @@ export default function DownloadModal({
 
   if (!isOpen || !item) return null
 
-  const totalDuration = userType === 'guest' ? 15 : userType === 'free' ? 6 : 0
-  const progress = totalDuration > 0
-    ? ((totalDuration - countdown) / totalDuration) * 100
-    : 100
-  const circumference = 2 * Math.PI * 28
+  const maxDuration = userType === 'guest' ? 15 : userType === 'free' ? 6 : 0
+  const timerColor = userType === 'guest' ? '#dc2626' : '#16a34a'
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '0' }}>
+      {/* Backdrop */}
+      <div
+        style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+        onClick={onClose}
+      />
 
-      <div className="relative bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
-        {/* Close */}
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+      {/* Modal — slides up from bottom on mobile */}
+      <div style={{
+        position: 'relative',
+        background: '#111827',
+        border: '1px solid #374151',
+        borderRadius: '20px 20px 0 0',
+        width: '100%',
+        maxWidth: '480px',
+        boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
+      }}>
+        {/* Drag handle */}
+        <div style={{ width: 40, height: 4, background: '#374151', borderRadius: 2, margin: '12px auto 0', cursor: 'grab' }} />
+
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          style={{ position: 'absolute', top: 16, right: 16, background: '#1f2937', border: 'none', color: '#9ca3af', width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}
+        >
+          ×
         </button>
 
-        <div className="p-6">
-          <h2 className="text-white font-bold text-xl mb-1 pr-8">Download</h2>
-          <p className="text-gray-400 text-sm mb-5 line-clamp-1">{item.title}</p>
-
-          {/* Timer — shown for guest and free users */}
-          {(userType === 'guest' || userType === 'free') && !canDownload && (
-            <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-5">
-              <div className="flex items-center gap-5">
-                {/* Circular countdown */}
-                <div className="relative w-16 h-16 flex-shrink-0">
-                  <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
-                    <circle cx="32" cy="32" r="28" fill="none" stroke="#374151" strokeWidth="5" />
-                    <circle
-                      cx="32" cy="32" r="28"
-                      fill="none"
-                      stroke={userType === 'guest' ? '#dc2626' : '#16a34a'}
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                      strokeDasharray={`${circumference}`}
-                      strokeDashoffset={`${circumference * (1 - progress / 100)}`}
-                      className="transition-all duration-1000"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white font-bold text-xl">{countdown}</span>
-                  </div>
-                </div>
-
-                {/* Message */}
-                <div className="flex-1">
-                  {userType === 'guest' && (
-                    <>
-                      <p className="text-white text-sm font-medium mb-1">
-                        Your download starts in <span className="text-red-400">{countdown}s</span>
-                      </p>
-                      <p className="text-gray-400 text-xs mb-2">Create a free account to reduce wait time</p>
-                      <button
-                        onClick={onOpenAuth}
-                        className="text-xs bg-green-700 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors"
-                      >
-                        Sign in — skip to 6s
-                      </button>
-                    </>
-                  )}
-                  {userType === 'free' && (
-                    <>
-                      <p className="text-white text-sm font-medium mb-1">
-                        Almost ready — <span className="text-green-400">{countdown}s</span>
-                      </p>
-                      <p className="text-gray-400 text-xs mb-2">Upgrade to Premium to download instantly</p>
-                      <span className="text-xs bg-yellow-600/30 text-yellow-300 px-2 py-1 rounded-lg">
-                        ⭐ Premium = no timer
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Premium — instant download */}
-          {userType === 'premium' && (
-            <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-xl p-4 mb-5 flex items-center gap-3">
-              <span className="text-2xl">⭐</span>
-              <div>
-                <p className="text-yellow-300 text-sm font-medium">Premium member</p>
-                <p className="text-gray-400 text-xs">Instant download — no waiting</p>
-              </div>
-            </div>
-          )}
+        <div style={{ padding: '12px 20px 24px' }}>
+          {/* Header */}
+          <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 18, margin: '0 0 4px' }}>Download</h2>
+          <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {item.title}
+          </p>
 
           {/* File type badge */}
-          <div className="flex items-center gap-2 mb-5">
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-              item.type === 'wallpaper' ? 'bg-blue-700/40 text-blue-300' :
-              item.type === 'ringtone' ? 'bg-green-700/40 text-green-300' :
-              'bg-purple-700/40 text-purple-300'
-            }`}>
-              {item.type === 'wallpaper' ? '🖼 Wallpaper' :
-               item.type === 'ringtone' ? '🎵 Ringtone' : '🎬 Live Wallpaper'}
+          <div style={{ marginBottom: 16 }}>
+            <span style={{
+              fontSize: 11, fontWeight: 500, padding: '3px 10px', borderRadius: 9999,
+              background: item.type === 'wallpaper' ? 'rgba(30,58,138,0.5)' : item.type === 'ringtone' ? 'rgba(20,83,45,0.5)' : 'rgba(88,28,135,0.5)',
+              color: item.type === 'wallpaper' ? '#93c5fd' : item.type === 'ringtone' ? '#86efac' : '#d8b4fe',
+            }}>
+              {item.type === 'wallpaper' ? '🖼 Wallpaper' : item.type === 'ringtone' ? '🎵 Ringtone' : '🎬 Live Wallpaper'}
             </span>
             {item.is_premium && (
-              <span className="text-xs bg-yellow-600/40 text-yellow-300 px-2.5 py-1 rounded-full">⭐ Premium</span>
+              <span style={{ marginLeft: 8, fontSize: 11, background: 'rgba(161,98,7,0.4)', color: '#fcd34d', padding: '3px 10px', borderRadius: 9999 }}>
+                ⭐ Premium
+              </span>
             )}
           </div>
+
+          {/* ═══ AD ZONE — DEASUPRA TIMER-ULUI ═══ */}
+          {(userType === 'guest' || userType === 'free') && !canDownload && (
+            <div
+              id="ad-container"
+              style={{
+                width: '100%',
+                minHeight: 100,
+                background: '#0d1117',
+                border: '1px dashed #2d3748',
+                borderRadius: 12,
+                marginBottom: 14,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                position: 'relative',
+              }}
+            >
+              {/* Ad label */}
+              <span style={{ position: 'absolute', top: 4, right: 8, fontSize: 9, color: '#4b5563' }}>Ad</span>
+              {/* Placeholder — înlocuiește cu codul Adsterra */}
+              <p style={{ color: '#374151', fontSize: 12, textAlign: 'center', margin: 0 }}>
+                Advertisement
+              </p>
+            </div>
+          )}
+
+          {/* ═══ TIMER — SUB RECLAMĂ ═══ */}
+          {(userType === 'guest' || userType === 'free') && !canDownload && (
+            <div style={{
+              background: '#1f2937',
+              borderRadius: 12,
+              padding: '12px 14px',
+              marginBottom: 14,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+            }}>
+              {/* Circle countdown */}
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                <CountdownCircle value={countdown} max={maxDuration} color={timerColor} />
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontWeight: 700, fontSize: 13,
+                }}>
+                  {countdown}
+                </div>
+              </div>
+
+              {/* Text + CTA */}
+              <div style={{ flex: 1 }}>
+                {userType === 'guest' && (
+                  <>
+                    <p style={{ color: '#fff', fontSize: 12, fontWeight: 500, margin: '0 0 3px' }}>
+                      Download starts in <span style={{ color: '#dc2626' }}>{countdown}s</span>
+                    </p>
+                    <p style={{ color: '#6b7280', fontSize: 11, margin: '0 0 6px' }}>
+                      Create a free account to reduce wait time
+                    </p>
+                    <button
+                      onClick={onOpenAuth}
+                      style={{ background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, fontSize: 11, padding: '4px 10px', cursor: 'pointer', fontWeight: 500 }}
+                    >
+                      Sign in — skip to 6s
+                    </button>
+                  </>
+                )}
+                {userType === 'free' && (
+                  <>
+                    <p style={{ color: '#fff', fontSize: 12, fontWeight: 500, margin: '0 0 3px' }}>
+                      Almost ready — <span style={{ color: '#16a34a' }}>{countdown}s</span>
+                    </p>
+                    <p style={{ color: '#6b7280', fontSize: 11, margin: 0 }}>
+                      ⭐ Premium = instant download, no timer
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Premium badge */}
+          {userType === 'premium' && (
+            <div style={{
+              background: 'rgba(161,98,7,0.15)',
+              border: '1px solid rgba(161,98,7,0.3)',
+              borderRadius: 12, padding: '12px 16px',
+              marginBottom: 14, display: 'flex', alignItems: 'center', gap: 10,
+            }}>
+              <span style={{ fontSize: 22 }}>⭐</span>
+              <div>
+                <p style={{ color: '#fcd34d', fontSize: 13, fontWeight: 500, margin: '0 0 2px' }}>Premium member</p>
+                <p style={{ color: '#92400e', fontSize: 11, margin: 0 }}>Instant download — no waiting</p>
+              </div>
+            </div>
+          )}
 
           {/* Download button */}
           <button
             onClick={onDownload}
             disabled={!canDownload || isDownloading}
-            className={`w-full font-semibold py-4 rounded-xl text-lg transition-all ${
-              canDownload && !isDownloading
-                ? 'bg-green-700 hover:bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-            }`}
+            style={{
+              width: '100%',
+              padding: '16px',
+              borderRadius: 14,
+              border: 'none',
+              fontSize: 17,
+              fontWeight: 600,
+              cursor: canDownload && !isDownloading ? 'pointer' : 'not-allowed',
+              background: canDownload && !isDownloading ? '#15803d' : '#1f2937',
+              color: canDownload && !isDownloading ? '#fff' : '#4b5563',
+              transition: 'all 0.2s',
+            }}
           >
-            {isDownloading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Downloading...
-              </span>
-            ) : !canDownload ? (
-              `Please wait ${countdown}s...`
-            ) : (
-              '↓ Download Free'
-            )}
+            {isDownloading ? '⏳ Downloading...' : !canDownload ? `Please wait ${countdown}s...` : '↓ Download Free'}
           </button>
 
-          <p className="text-center text-xs text-gray-600 mt-3">
+          <p style={{ textAlign: 'center', fontSize: 11, color: '#374151', margin: '10px 0 0' }}>
             Free for personal use · No registration required
           </p>
         </div>

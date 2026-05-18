@@ -26,27 +26,28 @@ interface UseDownloadReturn {
   startDownload: () => void
 }
 
-// Fetch timer duration from ad-settings edge function
+// Fix CORS: use query param instead of custom header
 async function getTimerDuration(userType: 'guest' | 'free'): Promise<number> {
   try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/ad-settings`, {
-      headers: {
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-        'x-user-type': userType,
-      },
-    })
+    const res = await fetch(
+      `${SUPABASE_URL}/functions/v1/ad-settings?type=${userType}`,
+      {
+        headers: {
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+        },
+      }
+    )
     if (!res.ok) throw new Error('fetch failed')
     const data = await res.json()
     return userType === 'guest'
-      ? (data?.data?.guest_timer_duration ?? 15)   // default 15s for guests
-      : (data?.data?.logged_in_timer_duration ?? 6) // default 6s for free users
+      ? (data?.data?.guest_timer_duration ?? 15)
+      : (data?.data?.logged_in_timer_duration ?? 6)
   } catch {
-    // Fallback defaults if edge function unavailable
     return userType === 'guest' ? 15 : 6
   }
 }
 
-// Increment download count
+// Fix 404: direct UPDATE instead of missing RPC
 async function incrementDownloadCount(item: DownloadItem) {
   const table =
     item.type === 'wallpaper' ? 'wallpapers' :
@@ -55,26 +56,21 @@ async function incrementDownloadCount(item: DownloadItem) {
   const countCol = item.type === 'wallpaper' ? 'download_count' : 'downloads_count'
 
   try {
-    // Try RPC first
-    await supabase.rpc('increment_download_count', {
-      p_table: table,
-      p_id: item.id,
-      p_column: countCol,
-    })
-  } catch {
-    // Fallback: raw increment
     const { data: current } = await supabase
       .from(table)
       .select('*')
       .eq('id', item.id)
       .single()
+
     if (current) {
       const row = current as Record<string, unknown>
-      const newCount = ((row[countCol] as number) || 0) + 1
+      const newVal = ((row[countCol] as number) || 0) + 1
       const patch: Record<string, unknown> = {}
-      patch[countCol] = newCount
+      patch[countCol] = newVal
       await supabase.from(table).update(patch).eq('id', item.id)
     }
+  } catch {
+    // Silently fail — don't block download on counter error
   }
 }
 
@@ -98,12 +94,8 @@ export function useDownload(): UseDownloadReturn {
   const [item, setItem] = useState<DownloadItem | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Determine user type
   const userType: 'guest' | 'free' | 'premium' = !user
-    ? 'guest'
-    : isPremium
-    ? 'premium'
-    : 'free'
+    ? 'guest' : isPremium ? 'premium' : 'free'
 
   const clearTimer = () => {
     if (intervalRef.current) {
@@ -113,7 +105,6 @@ export function useDownload(): UseDownloadReturn {
   }
 
   const openDownload = useCallback(async (newItem: DownloadItem) => {
-    // Premium wallpaper requires login
     if (newItem.is_premium && !user) {
       toast.error('Sign in to download premium wallpapers')
       return
@@ -125,18 +116,15 @@ export function useDownload(): UseDownloadReturn {
     setIsDownloading(false)
     setCanDownload(false)
 
-    const currentUserType: 'guest' | 'free' | 'premium' = !user
-      ? 'guest'
-      : isPremium ? 'premium' : 'free'
+    const currentUserType: 'guest' | 'free' | 'premium' =
+      !user ? 'guest' : isPremium ? 'premium' : 'free'
 
-    // Premium: no timer, download immediately available
     if (currentUserType === 'premium') {
       setCountdown(0)
       setCanDownload(true)
       return
     }
 
-    // Guest or Free: show timer
     const duration = await getTimerDuration(currentUserType)
     setCountdown(duration)
     setCanDownload(false)
@@ -164,26 +152,19 @@ export function useDownload(): UseDownloadReturn {
 
   const startDownload = useCallback(async () => {
     if (!item || isDownloading || !canDownload) return
-
     setIsDownloading(true)
     try {
       await incrementDownloadCount(item)
-      const ext =
-        item.type === 'ringtone' ? 'mp3' :
-        item.type === 'live' ? 'mp4' : 'jpg'
+      const ext = item.type === 'ringtone' ? 'mp3' : item.type === 'live' ? 'mp4' : 'jpg'
       triggerDownload(item.url, `${item.slug}.${ext}`)
       toast.success('Download started!')
       closeDownload()
-    } catch (err) {
+    } catch {
       toast.error('Download failed. Please try again.')
-      console.error('Download error:', err)
     } finally {
       setIsDownloading(false)
     }
   }, [item, isDownloading, canDownload, closeDownload])
 
-  return {
-    isOpen, isDownloading, countdown, canDownload, item,
-    userType, openDownload, closeDownload, startDownload,
-  }
+  return { isOpen, isDownloading, countdown, canDownload, item, userType, openDownload, closeDownload, startDownload }
 }
