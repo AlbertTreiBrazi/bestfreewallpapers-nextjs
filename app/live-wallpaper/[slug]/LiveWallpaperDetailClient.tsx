@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useDownload } from '@/hooks/useDownload'
 import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
+import FavoriteButton from '@/components/ui/FavoriteButton'
 import type { LiveWallpaper } from '@/types'
 
 interface Props {
@@ -57,7 +58,10 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
           {/* Info */}
           <div className="flex flex-col justify-between py-2">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">{lw.title}</h1>
+              <div className="flex items-start gap-3 mb-3">
+              <h1 className="text-2xl md:text-3xl font-bold text-white flex-1">{lw.title}</h1>
+              <FavoriteButton id={lw.id} type="live" size="md" />
+            </div>
               {lw.description && (
                 <p className="text-gray-400 mb-6 leading-relaxed">{lw.description}</p>
               )}

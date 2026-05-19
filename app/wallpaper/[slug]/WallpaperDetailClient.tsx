@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useDownload } from '@/hooks/useDownload'
 import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
+import FavoriteButton from '@/components/ui/FavoriteButton'
 import type { Wallpaper } from '@/types'
 
 interface Props {
@@ -59,7 +60,10 @@ export default function WallpaperDetailClient({ wallpaper, related }: Props) {
           {/* Info */}
           <div className="flex flex-col justify-between py-2">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">{wallpaper.title}</h1>
+              <div className="flex items-start gap-3 mb-3">
+                <h1 className="text-2xl md:text-3xl font-bold text-white flex-1">{wallpaper.title}</h1>
+                <FavoriteButton id={wallpaper.id} type="wallpaper" size="md" />
+              </div>
               {wallpaper.description && (
                 <p className="text-gray-400 mb-6 leading-relaxed">{wallpaper.description}</p>
               )}

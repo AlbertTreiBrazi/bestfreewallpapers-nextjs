@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useDownload } from '@/hooks/useDownload'
 import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
+import FavoriteButton from '@/components/ui/FavoriteButton'
 import type { Ringtone } from '@/types'
 
 interface Props {
@@ -75,7 +76,10 @@ export default function RingtoneDetailClient({ ringtone, related }: Props) {
 
             {/* Info */}
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl font-bold text-white mb-2">{ringtone.title}</h1>
+              <div className="flex items-start gap-3 mb-2">
+              <h1 className="text-2xl font-bold text-white flex-1">{ringtone.title}</h1>
+              <FavoriteButton id={ringtone.id} type="ringtone" size="md" />
+            </div>
               {ringtone.description && (
                 <p className="text-gray-400 mb-4 text-sm leading-relaxed">{ringtone.description}</p>
               )}
