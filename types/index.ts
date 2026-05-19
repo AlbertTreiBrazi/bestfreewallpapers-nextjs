@@ -101,6 +101,9 @@ export interface Profile {
   is_admin: boolean
   plan_type: 'free' | 'premium'
   premium_expires_at: string | null
+  admin_role: 'admin' | 'super_admin' | null
+  downloads_count: number
+  favorites_count: number
   created_at: string
   updated_at: string
 }

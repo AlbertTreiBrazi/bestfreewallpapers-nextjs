@@ -11,8 +11,11 @@ interface Profile {
   full_name: string | null
   avatar_url: string | null
   is_admin: boolean
+  admin_role: 'admin' | 'super_admin' | null
   plan_type: 'free' | 'premium'
   premium_expires_at: string | null
+  downloads_count: number
+  favorites_count: number
 }
 
 interface AuthContextType {
