@@ -26,7 +26,7 @@ export default function WallpaperCard({ id, title, slug, thumbnail_url, is_premi
   }
 
   return (
-    <Link href={`/wallpaper/${slug}`} className="group relative rounded-lg overflow-hidden bg-gray-800 aspect-[9/16] block">
+    <Link href={`/wallpaper/${slug}`} className="group relative rounded-lg overflow-hidden bg-gray-800 aspect-[9/16] block" onContextMenu={(e) => e.preventDefault()}>
       {thumbnail_url && (
         <Image src={thumbnail_url} alt={title} fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"

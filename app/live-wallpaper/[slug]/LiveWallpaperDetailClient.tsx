@@ -43,11 +43,11 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Video preview */}
-          <div className="relative aspect-[9/16] max-h-[70vh] w-full mx-auto rounded-2xl overflow-hidden bg-gray-800 shadow-2xl">
+          <div className="relative aspect-[9/16] max-h-[70vh] w-full mx-auto rounded-2xl overflow-hidden bg-gray-800 shadow-2xl" onContextMenu={(e) => e.preventDefault()}>
             <video
               src={lw.video_url}
               poster={lw.thumbnail_url || undefined}
-              autoPlay muted loop playsInline
+              autoPlay muted loop playsInline onContextMenu={(e) => e.preventDefault()} controlsList="nodownload"
               className="absolute inset-0 w-full h-full object-cover"
             />
             {lw.thumbnail_url && (
