@@ -30,23 +30,22 @@ interface UseDownloadReturn {
 // To customize: change these values or connect to ad-settings after fixing CORS
 async function getTimerDuration(userType: 'guest' | 'free'): Promise<number> {
   try {
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    const res = await fetch(
-      `${SUPABASE_URL}/functions/v1/ad-settings?type=${userType}`,
-      {
-        headers: {
-          apikey: anonKey,
-          Authorization: `Bearer ${anonKey}`,
-        },
-      }
-    )
-    if (!res.ok) throw new Error(`${res.status}`)
-    const data = await res.json()
-    return userType === 'guest'
-      ? (data?.data?.guest_timer_duration ?? 15)
-      : (data?.data?.logged_in_timer_duration ?? 6)
+    if (userType === 'guest') {
+      const { data } = await supabase
+        .from('guest_ad_settings')
+        .select('guest_timer_duration')
+        .limit(1)
+        .single()
+      return data?.guest_timer_duration ?? 15
+    } else {
+      const { data } = await supabase
+        .from('logged_in_ad_settings')
+        .select('logged_in_timer_duration')
+        .limit(1)
+        .single()
+      return data?.logged_in_timer_duration ?? 6
+    }
   } catch {
-    // Fallback defaults — configurable in admin panel later
     return userType === 'guest' ? 15 : 6
   }
 }
