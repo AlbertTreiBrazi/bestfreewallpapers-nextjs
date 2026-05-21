@@ -50,28 +50,12 @@ async function getTimerDuration(userType: 'guest' | 'free'): Promise<number> {
   }
 }
 
-// Fix 404: direct UPDATE instead of missing RPC
 async function incrementDownloadCount(item: DownloadItem) {
-  const table =
-    item.type === 'wallpaper' ? 'wallpapers' :
-    item.type === 'ringtone' ? 'ringtones' :
-    'live_wallpapers'
-  const countCol = item.type === 'wallpaper' ? 'download_count' : 'downloads_count'
-
   try {
-    const { data: current } = await supabase
-      .from(table)
-      .select('*')
-      .eq('id', item.id)
-      .single()
-
-    if (current) {
-      const row = current as Record<string, unknown>
-      const newVal = ((row[countCol] as number) || 0) + 1
-      const patch: Record<string, unknown> = {}
-      patch[countCol] = newVal
-      await supabase.from(table).update(patch).eq('id', item.id)
-    }
+    await supabase.rpc('increment_download_count', {
+      item_id: item.id,
+      item_type: item.type,
+    })
   } catch {
     // Silently fail — don't block download on counter error
   }

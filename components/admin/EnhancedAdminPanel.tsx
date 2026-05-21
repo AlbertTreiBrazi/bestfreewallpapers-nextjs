@@ -700,17 +700,30 @@ export function EnhancedAdminPanel() {
                 }}
                 className="w-full p-3 border border-theme-light rounded-lg bg-theme-surface text-theme-primary"
               >
-                <option value="dashboard">Dashboard</option>
-                <option value="analytics">Enhanced Analytics</option>
-                <option value="wallpapers">Free Wallpapers</option>
-                <option value="categories">Categories</option>
-                <option value="collections">Collections</option>
-                <option value="users">User Management</option>
-                <option value="actionslog">Admin Actions Log</option>
-                <option value="admins">Admin Management</option>
-                <option value="cache">Cache & Performance</option>
-                <option value="ads">Ad Settings</option>
-                <option value="banners">Premium Banners</option>
+                <optgroup label="📁 Content Management">
+                  <option value="wallpapers">Free Wallpapers</option>
+                  <option value="videos">Video Management</option>
+                  <option value="ringtones">Ringtones</option>
+                  <option value="live-wallpapers">Live Wallpapers</option>
+                  <option value="live-categories">Live Categories</option>
+                  <option value="ringtone-categories">Ringtone Categories</option>
+                  <option value="categories">Categories</option>
+                  <option value="collections">Collections</option>
+                  <option value="slugs">Slugs</option>
+                </optgroup>
+                <optgroup label="👥 User Management">
+                  <option value="users">User Management</option>
+                  <option value="actionslog">Admin Actions Log</option>
+                  <option value="admins">Admin Management</option>
+                </optgroup>
+                <optgroup label="⚡ System &amp; Performance">
+                  <option value="dashboard">Dashboard</option>
+                  <option value="analytics">Enhanced Analytics</option>
+                  <option value="ratelimits">Rate Limits</option>
+                  <option value="cache">Cache &amp; Performance</option>
+                  <option value="ads">Ad Settings</option>
+                  <option value="banners">Premium Banners</option>
+                </optgroup>
               </select>
             </div>
           </div>
@@ -811,7 +824,7 @@ export function EnhancedAdminPanel() {
             <div className="px-6 py-4 border-b border-theme-light">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-theme-primary">Admin Management</h2>
-                {stats?.adminInfo?.isSuperAdmin && (
+                {(profile?.admin_role === 'super_admin' || profile?.admin_role === 'admin') && (
                   <div className="flex items-center space-x-3">
                     <button
                       onClick={() => setShowInviteModal(true)}

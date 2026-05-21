@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useDownload } from '@/hooks/useDownload'
 import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
@@ -12,6 +12,44 @@ import type { LiveWallpaper } from '@/types'
 interface Props {
   lw: LiveWallpaper
   related: LiveWallpaper[]
+}
+
+function RelatedLiveCard({ w }: { w: LiveWallpaper }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [frameReady, setFrameReady] = useState(false)
+
+  return (
+    <Link key={w.id} href={`/live-wallpaper/${w.slug}`} className="group relative aspect-[9/16] rounded-lg overflow-hidden bg-gray-800 block">
+      {w.thumbnail_url
+        ? <Image src={w.thumbnail_url} alt={w.title} fill sizes="16vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />
+        : <>
+            <video
+              ref={videoRef}
+              src={w.video_url}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${frameReady ? 'opacity-100' : 'opacity-0'}`}
+              preload="metadata"
+              muted
+              playsInline
+              onLoadedMetadata={() => { if (videoRef.current) videoRef.current.currentTime = 0.1 }}
+              onSeeked={() => setFrameReady(true)}
+            />
+            {!frameReady && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white/60 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                </div>
+              </div>
+            )}
+          </>
+      }
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+        <div className="bg-black/60 rounded-full p-2">
+          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+        </div>
+      </div>
+      <p className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium line-clamp-1 opacity-0 group-hover:opacity-100 transition-opacity">{w.title}</p>
+    </Link>
+  )
 }
 
 export default function LiveWallpaperDetailClient({ lw, related }: Props) {
@@ -121,15 +159,7 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
             <h2 className="text-xl font-semibold text-white mb-6">More Live Wallpapers</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
               {related.map((w) => (
-                <Link key={w.id} href={`/live-wallpaper/${w.slug}`} className="group relative aspect-[9/16] rounded-lg overflow-hidden bg-gray-800 block">
-                  {w.thumbnail_url && <Image src={w.thumbnail_url} alt={w.title} fill sizes="16vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
-                    <div className="bg-black/60 rounded-full p-2">
-                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                    </div>
-                  </div>
-                  <p className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium line-clamp-1 opacity-0 group-hover:opacity-100 transition-opacity">{w.title}</p>
-                </Link>
+                <RelatedLiveCard key={w.id} w={w} />
               ))}
             </div>
           </section>
