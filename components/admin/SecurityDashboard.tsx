@@ -63,43 +63,42 @@ export function SecurityDashboard() {
 
   // Load conversion funnel metrics
   const loadConversionMetrics = async () => {
+    const defaultMetrics: ConversionMetrics = {
+      pageViews: 0,
+      downloadsStarted: 0,
+      downloadsCompleted: 0,
+      userRegistrations: 0,
+      premiumConversions: 0,
+      conversionRate: 0,
+    }
+
     try {
-      const { data, error } = await supabase
-        .rpc('get_conversion_funnel')
-      
-      if (error) throw error
-      
-      const metrics = data?.reduce((acc: any, item: any) => {
+      const { data, error } = await supabase.rpc('get_conversion_funnel')
+
+      // Function not yet implemented in DB — show zeros
+      if (error) {
+        setConversionMetrics(defaultMetrics)
+        return
+      }
+
+      const metrics = (data || []).reduce((acc: ConversionMetrics, item: any) => {
         switch (item.step) {
-          case 'Page Views':
-            acc.pageViews = item.users
-            break
-          case 'Downloads Started':
-            acc.downloadsStarted = item.users
-            break
-          case 'Downloads Completed':
-            acc.downloadsCompleted = item.users
-            break
-          case 'User Registrations':
-            acc.userRegistrations = item.users
-            break
-          case 'Premium Conversions':
-            acc.premiumConversions = item.users
-            break
+          case 'Page Views':          acc.pageViews = item.users; break
+          case 'Downloads Started':   acc.downloadsStarted = item.users; break
+          case 'Downloads Completed': acc.downloadsCompleted = item.users; break
+          case 'User Registrations':  acc.userRegistrations = item.users; break
+          case 'Premium Conversions': acc.premiumConversions = item.users; break
         }
         return acc
-      }, {})
-      
-      const conversionRate = metrics.pageViews > 0 
-        ? (metrics.premiumConversions / metrics.pageViews) * 100 
+      }, { ...defaultMetrics })
+
+      metrics.conversionRate = metrics.pageViews > 0
+        ? (metrics.premiumConversions / metrics.pageViews) * 100
         : 0
-      
-      setConversionMetrics({
-        ...metrics,
-        conversionRate
-      })
-    } catch (error) {
-      console.error('Error loading conversion metrics:', error)
+
+      setConversionMetrics(metrics)
+    } catch {
+      setConversionMetrics(defaultMetrics)
     }
   }
 
