@@ -91,7 +91,8 @@ export default function HomeLiveCard({ lw }: Props) {
           ref={videoRef}
           src={lw.video_url}
           className="absolute inset-0 w-full h-full object-cover"
-          loop muted playsInline preload="none"
+          loop muted playsInline
+          preload={lw.thumbnail_url ? 'none' : 'metadata'}
           onLoadedMetadata={(e) => { e.currentTarget.currentTime = 0.1 }}
           onSeeked={(e) => { if (e.currentTarget.currentTime <= 0.2) setFrameReady(true) }}
         />

@@ -161,7 +161,7 @@ export default function RingtonesPage() {
 
     let query = supabase
       .from('ringtones')
-      .select('id, title, slug, cover_image_url, audio_url, duration_seconds, downloads_count, is_premium, tags, m4r_url, plays_count, creator_name, seo_title, seo_description, meta_keywords, is_active, is_published, created_at, updated_at, description, file_size_bytes')
+      .select('id, title, slug, cover_image_url, audio_url, duration_seconds, downloads_count, is_premium')
       .eq('is_active', true)
       .eq('is_published', true)
       .range(from, to)

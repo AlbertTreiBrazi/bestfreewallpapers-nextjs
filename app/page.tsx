@@ -40,9 +40,9 @@ async function getHomepageData() {
       .eq('is_active', true)
       .order('display_order', { ascending: true })
       .limit(8),
-    supabase.from('wallpapers').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('ringtones').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('is_published', true),
-    supabase.from('live_wallpapers').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('is_published', true),
+    supabase.from('wallpapers').select('id', { count: 'estimated', head: true }).eq('is_active', true),
+    supabase.from('ringtones').select('id', { count: 'estimated', head: true }).eq('is_active', true).eq('is_published', true),
+    supabase.from('live_wallpapers').select('id', { count: 'estimated', head: true }).eq('is_active', true).eq('is_published', true),
   ])
 
   return {
