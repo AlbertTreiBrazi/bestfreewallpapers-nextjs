@@ -1,145 +1,132 @@
 -- ============================================================
--- Performance indexes for bestfreewallpapers.com
--- Supports 100,000+ rows on wallpapers / live_wallpapers / ringtones
+-- Performance indexes — bestfreewallpapers.com
+-- Updated after diagnostic (2026-05-21)
 --
--- HOW TO RUN:
---   1. Open Supabase Dashboard → SQL Editor
---   2. Run the pg_trgm extension line first (Section F)
---   3. Run each CREATE INDEX statement individually
---      (CONCURRENTLY cannot run inside a transaction block)
---   4. All statements use IF NOT EXISTS — safe to re-run
+-- DIAGNOSTIC RESULT:
+--   wallpapers:      37+ indexes (over-indexed, duplicates present)
+--   ringtones:       12 indexes (reasonable, missing partial + trgm)
+--   live_wallpapers:  8 indexes (missing downloads_count sort + trgm)
+--   categories:      well indexed — nothing to add
+--   collections:     well indexed — nothing to add
+--   favorites:       well indexed — nothing to add
+--   pg_trgm:         NOT installed
 --
--- NOTE: No sensitive data, keys, or secrets in this file.
+-- HOW TO RUN (Supabase SQL Editor):
+--   Run STEP 1 first (extension), then STEP 2 (indexes),
+--   then optionally STEP 3 (drop duplicates).
+--   Each CONCURRENTLY statement must run individually
+--   (not inside a BEGIN/COMMIT block).
+--   All CREATE statements use IF NOT EXISTS — safe to re-run.
+--
+-- NO sensitive data, keys, or secrets in this file.
 -- ============================================================
 
+
 -- ============================================================
--- F. Extension required for ILIKE / full-text search indexes
---    Run this FIRST before the *_trgm indexes below
+-- STEP 1 — Enable pg_trgm extension (required for ILIKE search)
+--          Run this FIRST, alone.
 -- ============================================================
+
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 
 -- ============================================================
--- A. wallpapers
+-- STEP 2 — Missing indexes (run after STEP 1)
 -- ============================================================
 
--- Popular sort — homepage + /wallpapers (most common query)
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_wallpapers_active_downloads
-    ON wallpapers (download_count DESC)
-    WHERE is_active = true;
-
--- Newest / Oldest sort — /wallpapers?sort=newest|oldest
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_wallpapers_active_created
-    ON wallpapers (created_at DESC)
-    WHERE is_active = true;
-
--- Free / Premium filter + popular sort — /wallpapers?filter=free|premium
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_wallpapers_active_premium_downloads
-    ON wallpapers (is_premium, download_count DESC)
-    WHERE is_active = true;
-
--- Category page — /category/[slug] filters by category_id
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_wallpapers_active_category
-    ON wallpapers (category_id, download_count DESC)
-    WHERE is_active = true;
-
--- Slug lookup — /wallpaper/[slug] detail page
-CREATE UNIQUE INDEX IF NOT EXISTS idx_wallpapers_slug
-    ON wallpapers (slug);
-
--- Search — ILIKE '%query%' on title (requires pg_trgm extension)
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_wallpapers_title_trgm
-    ON wallpapers USING gin (title gin_trgm_ops);
-
-
--- ============================================================
--- B. live_wallpapers
--- ============================================================
-
--- Popular sort + active/published filter — /live-wallpapers, homepage
+-- live_wallpapers: popular sort — /live-wallpapers page, homepage
+-- Existing idx_live_wallpapers_published covers (is_published, is_active)
+-- but has no downloads_count column — this one adds the sort column.
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_live_wallpapers_active_pub_downloads
     ON live_wallpapers (downloads_count DESC)
     WHERE is_active = true AND is_published = true;
 
--- Slug lookup — /live-wallpaper/[slug] detail page
-CREATE UNIQUE INDEX IF NOT EXISTS idx_live_wallpapers_slug
-    ON live_wallpapers (slug);
-
--- Category filter — /live-wallpapers?category=nature etc.
+-- live_wallpapers: category filter with downloads sort
+-- Existing idx_live_wallpapers_category covers (category) WHERE category IS NOT NULL
+-- This partial index adds is_active/is_published guard + downloads sort.
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_live_wallpapers_active_pub_category
     ON live_wallpapers (category, downloads_count DESC)
     WHERE is_active = true AND is_published = true;
 
--- Search — ILIKE '%query%' on title
+-- ILIKE title search (all 3 content tables)
+-- Requires pg_trgm extension from STEP 1.
+-- wallpapers has a tsvector index on description but NOT on title with trgm.
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_wallpapers_title_trgm
+    ON wallpapers USING gin (title gin_trgm_ops);
+
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_live_wallpapers_title_trgm
     ON live_wallpapers USING gin (title gin_trgm_ops);
 
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ringtones_title_trgm
+    ON ringtones USING gin (title gin_trgm_ops);
 
--- ============================================================
--- C. ringtones
--- ============================================================
+-- ringtones: GIN index on tags array
+-- Used by /ringtones/category/[slug] → .contains('tags', [categorySlug])
+-- Not present in diagnostic results.
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ringtones_tags_gin
+    ON ringtones USING gin (tags);
 
--- Popular sort — /ringtones, homepage
+-- ringtones: partial popular sort (more efficient than existing full-table idx_ringtones_downloads)
+-- Existing: idx_ringtones_downloads ON (downloads_count DESC) — no WHERE clause
+-- This partial index is ~80% smaller and faster for the common case.
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ringtones_active_pub_downloads
     ON ringtones (downloads_count DESC)
     WHERE is_active = true AND is_published = true;
 
--- Newest sort — /ringtones?sort=newest
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ringtones_active_pub_created
-    ON ringtones (created_at DESC)
-    WHERE is_active = true AND is_published = true;
-
--- Duration sort — /ringtones?sort=duration (Shortest First)
+-- ringtones: duration sort — /ringtones?sort=duration
+-- Not present in diagnostic results.
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ringtones_active_pub_duration
     ON ringtones (duration_seconds ASC)
     WHERE is_active = true AND is_published = true;
 
--- Slug lookup — /ringtone/[slug] detail page
-CREATE UNIQUE INDEX IF NOT EXISTS idx_ringtones_slug
-    ON ringtones (slug);
 
--- Tags GIN — /ringtones/category/[slug] uses .contains('tags', [...])
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ringtones_tags_gin
-    ON ringtones USING gin (tags);
+-- ============================================================
+-- STEP 3 — Drop duplicate indexes (OPTIONAL but recommended)
+--
+-- The wallpapers table has 40+ indexes — every INSERT/UPDATE
+-- maintains ALL of them. Removing exact duplicates speeds up writes.
+-- Run each DROP individually. Safe: all use IF EXISTS.
+-- ============================================================
 
--- Search — ILIKE '%query%' on title
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ringtones_title_trgm
-    ON ringtones USING gin (title gin_trgm_ops);
+-- wallpapers: exact duplicates on single columns
+-- Keep: idx_wallpapers_active (simple is_active index)
+DROP INDEX CONCURRENTLY IF EXISTS idx_wallpapers_is_active;
+
+-- Keep: idx_wallpapers_premium
+DROP INDEX CONCURRENTLY IF EXISTS idx_wallpapers_is_premium;
+
+-- Keep: idx_wallpapers_published
+DROP INDEX CONCURRENTLY IF EXISTS idx_wallpapers_is_published;
+
+-- Keep: idx_wallpapers_download_count_desc
+-- idx_wallpapers_download_count is identical but uses NULLS LAST (minor diff)
+-- Check both exist before dropping — if unsure, skip this one.
+-- DROP INDEX CONCURRENTLY IF EXISTS idx_wallpapers_download_count;
+
+-- wallpapers: duplicate (width, height) indexes
+-- Keep: idx_wallpapers_aspect_ratio
+DROP INDEX CONCURRENTLY IF EXISTS idx_wallpapers_dimensions;
+
+-- live_wallpaper_favorites: duplicate user_id indexes
+-- Keep: idx_live_favorites_user_id
+DROP INDEX CONCURRENTLY IF EXISTS idx_live_wallpaper_favorites_user;
+
+-- ringtone_favorites: duplicate user_id indexes
+-- Keep: idx_ringtone_fav_user
+DROP INDEX CONCURRENTLY IF EXISTS idx_ringtone_favorites_user_id;
 
 
 -- ============================================================
--- D. categories & collections
+-- VERIFICATION — Run after all steps to confirm indexes exist
 -- ============================================================
-
--- Categories listing — ORDER BY sort_order ASC WHERE is_active
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_categories_active_sort
-    ON categories (sort_order ASC)
-    WHERE is_active = true;
-
--- Category slug lookup — /category/[slug]
-CREATE INDEX IF NOT EXISTS idx_categories_slug
-    ON categories (slug);
-
--- Collections listing — ORDER BY sort_order ASC WHERE is_active
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_collections_active_sort
-    ON collections (sort_order ASC)
-    WHERE is_active = true;
-
--- Collection slug lookup — /collections/[slug]
-CREATE INDEX IF NOT EXISTS idx_collections_slug
-    ON collections (slug);
-
-
+--
+-- SELECT indexname, indexdef
+-- FROM pg_indexes
+-- WHERE tablename IN ('wallpapers', 'live_wallpapers', 'ringtones')
+--   AND indexname LIKE '%trgm%'
+--    OR indexname LIKE '%pub_downloads%'
+--    OR indexname LIKE '%tags_gin%'
+-- ORDER BY tablename, indexname;
+--
+-- SELECT extname, extversion FROM pg_extension WHERE extname = 'pg_trgm';
 -- ============================================================
--- E. favorites tables (per-user queries)
--- ============================================================
-
--- .eq('user_id', userId) on each favorites table
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_favorites_user_id
-    ON favorites (user_id);
-
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ringtone_favorites_user_id
-    ON ringtone_favorites (user_id);
-
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_live_wallpaper_favorites_user_id
-    ON live_wallpaper_favorites (user_id);
