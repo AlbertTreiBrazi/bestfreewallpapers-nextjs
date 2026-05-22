@@ -8,9 +8,24 @@ import HomeLiveCard from '@/components/home/HomeLiveCard'
 import WallpaperCard from '@/components/wallpapers/WallpaperCard'
 
 export const metadata: Metadata = {
-  title: 'Best Free Wallpapers — HD Wallpapers for iPhone & Android',
-  description: 'Download free HD wallpapers, live wallpapers and ringtones for iPhone, Android, Samsung. Thousands of high quality images updated daily. No registration required.',
-  keywords: ['free wallpapers', 'iphone wallpapers', 'android wallpapers', 'live wallpapers', 'free ringtones', 'HD wallpapers', 'mobile wallpapers'],
+  title: 'Free HD Wallpapers Download — iPhone, Android, Live Wallpapers & Ringtones',
+  description: 'Download free 4K & HD wallpapers for iPhone lock screen, Android, Samsung. Aesthetic, dark, anime & nature designs. Plus live wallpapers & free ringtones. No sign-up.',
+  keywords: [
+    'free wallpapers download',
+    'HD wallpapers',
+    '4K wallpapers',
+    'iPhone wallpapers',
+    'iPhone lock screen wallpapers',
+    'aesthetic wallpapers',
+    'Android wallpapers',
+    'Samsung Galaxy wallpapers',
+    'live wallpapers',
+    'live wallpaper iPhone',
+    'free ringtones',
+    'cute wallpapers',
+    'anime wallpapers',
+    'dark wallpapers',
+  ],
   alternates: { canonical: 'https://bestfreewallpapers.com' },
 }
 
@@ -24,7 +39,7 @@ async function getHomepageData() {
       .select('id, title, slug, thumbnail_url, image_url, download_count, is_premium, category')
       .eq('is_active', true)
       .order('download_count', { ascending: false })
-      .limit(12),
+      .limit(8),
     supabase.from('ringtones')
       .select('id, title, slug, cover_image_url, audio_url, duration_seconds, downloads_count, is_premium')
       .eq('is_active', true).eq('is_published', true)
@@ -58,13 +73,6 @@ async function getHomepageData() {
   }
 }
 
-const DEVICE_COLLECTIONS = [
-  { name: 'iPhone Wallpapers', slug: 'iphone', gradient: 'from-blue-600 to-purple-600' },
-  { name: 'Android Wallpapers', slug: 'android', gradient: 'from-green-600 to-emerald-600' },
-  { name: 'Samsung Galaxy', slug: 'samsung', gradient: 'from-purple-600 to-pink-600' },
-  { name: 'iPad Wallpapers', slug: 'ipad', gradient: 'from-cyan-600 to-blue-600' },
-]
-
 export default async function HomePage() {
   const { wallpapers, ringtones, liveWallpapers, categories, stats } = await getHomepageData()
 
@@ -89,10 +97,10 @@ export default async function HomePage() {
       {/* 1. HERO */}
       <HomeHero stats={stats} />
 
-      <div className="max-w-7xl mx-auto px-4 py-12 space-y-16">
+      <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
 
         {/* 2. TRENDING WALLPAPERS */}
-        <section>
+        <section id="wallpapers">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Trending Wallpapers</h2>
@@ -102,7 +110,7 @@ export default async function HomePage() {
               See all →
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {wallpapers.map((w: any) => (
               <WallpaperCard
                 key={w.id}
@@ -117,27 +125,9 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 3. RINGTONES */}
-        {ringtones.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Free Ringtones</h2>
-                <p className="text-gray-400 text-sm">MP3 & M4R ringtones for iPhone and Android · click ▶ to preview</p>
-              </div>
-              <Link href="/ringtones" className="text-green-400 hover:text-green-300 text-sm font-medium whitespace-nowrap">
-                See all →
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-              {ringtones.map((r: any) => <HomeRingtoneCard key={r.id} ringtone={r} />)}
-            </div>
-          </section>
-        )}
-
-        {/* 4. LIVE WALLPAPERS */}
+        {/* 3. LIVE WALLPAPERS */}
         {liveWallpapers.length > 0 && (
-          <section>
+          <section id="live-wallpapers">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Live Wallpapers</h2>
@@ -149,6 +139,24 @@ export default async function HomePage() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
               {liveWallpapers.map((lw: any) => <HomeLiveCard key={lw.id} lw={lw} />)}
+            </div>
+          </section>
+        )}
+
+        {/* 4. RINGTONES */}
+        {ringtones.length > 0 && (
+          <section id="ringtones">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Free Ringtones</h2>
+                <p className="text-gray-400 text-sm">MP3 & M4R ringtones for iPhone and Android · click ▶ to preview</p>
+              </div>
+              <Link href="/ringtones" className="text-green-400 hover:text-green-300 text-sm font-medium whitespace-nowrap">
+                See all →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+              {ringtones.map((r: any) => <HomeRingtoneCard key={r.id} ringtone={r} />)}
             </div>
           </section>
         )}
@@ -187,32 +195,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* 6. DEVICE COLLECTIONS */}
-        <section>
-          <div className="mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Wallpapers for Your Device</h2>
-            <p className="text-gray-400 text-sm">Optimized wallpapers for every phone and tablet</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {DEVICE_COLLECTIONS.map((col) => (
-              <Link
-                key={col.slug}
-                href={`/collections/${col.slug}-wallpapers`}
-                className={`group relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br ${col.gradient} hover:scale-[1.02] transition-transform`}
-              >
-                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
-                <div className="absolute inset-0 flex items-center justify-center text-center p-4">
-                  <div>
-                    <p className="text-white text-base md:text-lg font-bold">{col.name}</p>
-                    <p className="text-white/80 text-xs mt-1">Browse collection →</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* 7. SEO TEXT BLOCK */}
+        {/* 6. SEO TEXT BLOCK */}
         <section className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 md:p-8">
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4">About BestFreeWallpapers</h2>
           <div className="text-gray-400 text-sm leading-relaxed space-y-3">
@@ -221,6 +204,9 @@ export default async function HomePage() {
             </p>
             <p>
               Whether you&apos;re looking for <Link href="/category/aesthetic" className="text-green-400 hover:underline">aesthetic wallpapers</Link>, <Link href="/category/dark" className="text-green-400 hover:underline">dark themes</Link>, or stunning <Link href="/live-wallpapers" className="text-green-400 hover:underline">live wallpapers</Link>, we&apos;ve got you covered. All our content is 100% free to download — no registration required, no watermarks, no hidden costs. Premium wallpapers offer ad-free downloads and exclusive 4K resolution.
+            </p>
+            <p>
+              All wallpapers are available in mobile-optimized resolutions — including <strong className="text-gray-200">iPhone lock screen</strong> (1170×2532 for iPhone 14/15), full HD Android (1080×1920), and <strong className="text-gray-200">4K desktop</strong> backgrounds, ensuring sharp, pixel-perfect results on any screen.
             </p>
             <p>
               In addition to wallpapers, we offer free <Link href="/ringtones" className="text-green-400 hover:underline">MP3 and M4R ringtones</Link> for your smartphone — perfect for personalizing your iPhone calls, Android notifications, and alarm sounds. New wallpapers and ringtones added weekly.

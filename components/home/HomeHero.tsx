@@ -33,7 +33,7 @@ export default function HomeHero({ stats }: { stats: { wallpapers: number; ringt
         backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(34, 197, 94, 0.15), transparent 50%), radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.12), transparent 50%)'
       }} />
 
-      <div className="relative max-w-5xl mx-auto px-4 py-16 md:py-24 text-center">
+      <div className="relative max-w-5xl mx-auto px-4 py-12 md:py-20 text-center">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 bg-green-900/30 border border-green-700/30 text-green-300 px-3 py-1 rounded-full text-xs font-medium mb-6">
           <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
@@ -49,7 +49,7 @@ export default function HomeHero({ stats }: { stats: { wallpapers: number; ringt
         </h1>
 
         <p className="text-gray-400 text-base md:text-lg mb-8 max-w-2xl mx-auto">
-          Download high-quality HD wallpapers, live wallpapers and free ringtones. No registration required, no watermarks, 100% free.
+          Free 4K &amp; HD wallpapers for iPhone lock screen and Android, animated live wallpapers, and free ringtones. No registration, no watermarks.
         </p>
 
         {/* Search bar */}
@@ -73,6 +73,19 @@ export default function HomeHero({ stats }: { stats: { wallpapers: number; ringt
             </button>
           </div>
         </form>
+
+        {/* Quick nav to content types */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
+          <a href="#wallpapers" className="bg-gray-800/70 hover:bg-gray-700 border border-gray-700 text-gray-200 text-xs font-medium px-4 py-1.5 rounded-full transition-all">
+            Wallpapers
+          </a>
+          <a href="#live-wallpapers" className="bg-gray-800/70 hover:bg-gray-700 border border-gray-700 text-gray-200 text-xs font-medium px-4 py-1.5 rounded-full transition-all">
+            Live Wallpapers
+          </a>
+          <a href="#ringtones" className="bg-gray-800/70 hover:bg-gray-700 border border-gray-700 text-gray-200 text-xs font-medium px-4 py-1.5 rounded-full transition-all">
+            Ringtones
+          </a>
+        </div>
 
         {/* Category tags */}
         <div className="flex flex-wrap items-center justify-center gap-2 max-w-3xl mx-auto">
