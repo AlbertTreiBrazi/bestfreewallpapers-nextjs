@@ -1476,10 +1476,10 @@ export function WallpaperManagement() {
 
                 {/* 4K/8K Asset Management */}
                 <div className="lg:col-span-2">
-                  <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
                     <h4 className="text-lg font-semibold text-theme-primary mb-4 flex items-center">
                       High Resolution Assets
-                      <span className="ml-2 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800 px-2 py-1 rounded-full">Premium Only</span>
+                      <span className="ml-2 text-xs bg-yellow-900/30 text-yellow-200 border border-yellow-800 px-2 py-1 rounded-full">Premium Only</span>
                     </h4>
                     
                     {/* 4K Section */}
@@ -1500,14 +1500,14 @@ export function WallpaperManagement() {
                         type="url"
                         value={formData.asset_4k_url}
                         onChange={(e) => updateFormData({ asset_4k_url: e.target.value })}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                          formData.show_4k ? 'border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20' : 'border-theme-light'
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-gray-100 ${
+                          formData.show_4k ? 'border-yellow-700 bg-yellow-900/20' : 'border-gray-600 bg-gray-700'
                         }`}
                         placeholder="https://example.com/wallpaper-4k.jpg"
                       />
                       {formData.asset_4k_url && (
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                          Preview: <a href={formData.asset_4k_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">View 4K Asset</a>
+                        <p className="text-xs text-gray-400">
+                          Preview: <a href={formData.asset_4k_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">View 4K Asset</a>
                         </p>
                       )}
                     </div>
@@ -1530,14 +1530,14 @@ export function WallpaperManagement() {
                         type="url"
                         value={formData.asset_8k_url}
                         onChange={(e) => updateFormData({ asset_8k_url: e.target.value })}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                          formData.show_8k ? 'border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20' : 'border-theme-light'
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-100 ${
+                          formData.show_8k ? 'border-purple-700 bg-purple-900/20' : 'border-gray-600 bg-gray-700'
                         }`}
                         placeholder="https://example.com/wallpaper-8k.jpg"
                       />
                       {formData.asset_8k_url && (
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                          Preview: <a href={formData.asset_8k_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">View 8K Asset</a>
+                        <p className="text-xs text-gray-400">
+                          Preview: <a href={formData.asset_8k_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">View 8K Asset</a>
                         </p>
                       )}
                     </div>
@@ -1559,9 +1559,9 @@ export function WallpaperManagement() {
                       />
                     </div>
 
-                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                      <p className="text-xs text-blue-800 dark:text-blue-300">
-                        <strong className="text-blue-900 dark:text-blue-200">Note:</strong> High resolution downloads are only available to premium users. Toggles control whether the 4K/8K buttons appear on the detail page.
+                    <div className="mt-4 p-3 bg-blue-900/20 rounded border border-blue-800">
+                      <p className="text-xs text-blue-300">
+                        <strong className="text-blue-200">Note:</strong> High resolution downloads are only available to premium users. Toggles control whether the 4K/8K buttons appear on the detail page.
                       </p>
                     </div>
                   </div>
