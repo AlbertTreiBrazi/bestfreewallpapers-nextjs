@@ -1315,7 +1315,7 @@ export function WallpaperManagement() {
                     value={formData.title}
                     onChange={(e) => updateFormData({ title: e.target.value })}
                     required
-                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     placeholder="Enter wallpaper title"
                   />
                 </div>
@@ -1326,7 +1326,7 @@ export function WallpaperManagement() {
                     value={formData.description}
                     onChange={(e) => updateFormData({ description: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     placeholder="Enter wallpaper description"
                   />
                 </div>
@@ -1363,7 +1363,7 @@ export function WallpaperManagement() {
                     value={formData.image_url}
                     onChange={(e) => updateFormData({ image_url: e.target.value })}
                     required
-                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     placeholder="https://example.com/image.jpg"
                   />
                 </div>
@@ -1650,7 +1650,7 @@ export function WallpaperManagement() {
                     value={collectionFormData.name}
                     onChange={(e) => setCollectionFormData((prev: any) => ({ ...prev, name: e.target.value }))}
                     required
-                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     placeholder="Enter collection name"
                   />
                 </div>
@@ -1661,7 +1661,7 @@ export function WallpaperManagement() {
                     type="text"
                     value={collectionFormData.slug}
                     onChange={(e) => setCollectionFormData((prev: any) => ({ ...prev, slug: e.target.value }))}
-                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     placeholder="collection-slug (auto-generated if empty)"
                   />
                 </div>
@@ -1672,7 +1672,7 @@ export function WallpaperManagement() {
                     value={collectionFormData.description}
                     onChange={(e) => setCollectionFormData((prev: any) => ({ ...prev, description: e.target.value }))}
                     rows={3}
-                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     placeholder="Enter collection description"
                   />
                 </div>
@@ -1683,7 +1683,7 @@ export function WallpaperManagement() {
                     type="url"
                     value={collectionFormData.thumbnail_url}
                     onChange={(e) => setCollectionFormData((prev: any) => ({ ...prev, thumbnail_url: e.target.value }))}
-                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     placeholder="https://example.com/thumbnail.jpg"
                   />
                 </div>
@@ -1694,7 +1694,7 @@ export function WallpaperManagement() {
                     type="number"
                     value={collectionFormData.sort_order}
                     onChange={(e) => setCollectionFormData((prev: any) => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
-                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     placeholder="0"
                   />
                 </div>
