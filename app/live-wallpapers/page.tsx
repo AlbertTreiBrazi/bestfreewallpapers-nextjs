@@ -7,6 +7,8 @@ import { supabase } from '@/lib/supabase'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { LiveWallpaper } from '@/types'
 
+interface LiveCategory { id: number; name: string; slug: string; preview_image: string | null }
+
 const LIMIT = 48
 
 function LiveWallpaperCard({ lw }: { lw: LiveWallpaper }) {
@@ -122,12 +124,22 @@ function LiveWallpaperCard({ lw }: { lw: LiveWallpaper }) {
 
 export default function LiveWallpapersPage() {
   const [wallpapers, setWallpapers] = useState<LiveWallpaper[]>([])
+  const [categories, setCategories] = useState<LiveCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    supabase
+      .from('live_wallpaper_categories')
+      .select('id, name, slug, preview_image')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => setCategories((data || []) as LiveCategory[]))
+  }, [])
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400)
@@ -177,6 +189,26 @@ export default function LiveWallpapersPage() {
         <h1 className="text-3xl font-bold text-white mb-1">Free Live Wallpapers</h1>
         <p className="text-gray-400 text-sm">Hover to preview · Click to download · Animated wallpapers for iPhone and Android</p>
       </div>
+
+      {/* Categories strip */}
+      {categories.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-6">
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              href={`/live-wallpapers/category/${cat.slug}`}
+              className="flex-shrink-0 flex items-center gap-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-600 text-gray-300 hover:text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-200"
+            >
+              {cat.preview_image && (
+                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
+                  <Image src={cat.preview_image} alt={cat.name} width={20} height={20} className="object-cover w-full h-full" />
+                </div>
+              )}
+              <span>{cat.name}</span>
+            </Link>
+          ))}
+        </div>
+      )}
 
       <div className="relative max-w-md mb-6">
         <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

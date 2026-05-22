@@ -1,11 +1,65 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import AuthModal from '@/components/auth/AuthModal'
+
+function FavoriteLiveCard({ lw }: { lw: FavoriteLive }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [playing, setPlaying] = useState(false)
+
+  const handleEnter = () => {
+    if (videoRef.current && lw.video_url) {
+      videoRef.current.play().catch(() => {})
+      setPlaying(true)
+    }
+  }
+  const handleLeave = () => {
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0.1
+      setPlaying(false)
+    }
+  }
+
+  return (
+    <Link
+      href={`/live-wallpaper/${lw.slug}`}
+      className="group relative rounded-lg overflow-hidden bg-gray-800 aspect-[9/16] block"
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+    >
+      {lw.thumbnail_url && (
+        <Image
+          src={lw.thumbnail_url}
+          alt={lw.title}
+          fill
+          sizes="16vw"
+          className={`object-cover transition-opacity duration-300 ${playing ? 'opacity-0' : 'opacity-100'}`}
+        />
+      )}
+      {lw.video_url && (
+        <video
+          ref={videoRef}
+          src={lw.video_url}
+          className="absolute inset-0 w-full h-full object-cover"
+          loop muted playsInline
+          preload="none"
+          onLoadedMetadata={(e) => { e.currentTarget.currentTime = 0.1 }}
+        />
+      )}
+      <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${playing ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}>
+        <div className="bg-black/60 rounded-full p-2">
+          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+        </div>
+      </div>
+      <p className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium line-clamp-1 opacity-0 group-hover:opacity-100 transition-opacity">{lw.title}</p>
+    </Link>
+  )
+}
 
 interface FavoriteWallpaper {
   id: number; title: string; slug: string
@@ -15,7 +69,7 @@ interface FavoriteRingtone {
   id: number; title: string; slug: string; cover_image_url: string | null
 }
 interface FavoriteLive {
-  id: number; title: string; slug: string; thumbnail_url: string | null
+  id: number; title: string; slug: string; thumbnail_url: string | null; video_url?: string
 }
 
 export default function FavoritesPage() {
@@ -31,25 +85,27 @@ export default function FavoritesPage() {
     if (!user) return
     setFetching(true)
     Promise.all([
-      // Correct table: favorites (not user_favorites)
-      supabase
-        .from('favorites')
-        .select('wallpaper:wallpapers(id, title, slug, thumbnail_url, is_premium)')
-        .eq('user_id', user.id),
-      // Correct table: ringtone_favorites (not user_ringtone_favorites)
-      supabase
-        .from('ringtone_favorites')
-        .select('ringtone:ringtones(id, title, slug, cover_image_url)')
-        .eq('user_id', user.id),
-      // Correct table: live_wallpaper_favorites
-      supabase
-        .from('live_wallpaper_favorites')
-        .select('live_wallpaper:live_wallpapers(id, title, slug, thumbnail_url)')
-        .eq('user_id', user.id),
-    ]).then(([wallRes, ringRes, liveRes]) => {
-      setWallpapers((wallRes.data || []).map((r: any) => r.wallpaper).filter(Boolean))
+      // Two-step: get IDs first, then fetch wallpapers directly (avoids join RLS issues)
+      supabase.from('favorites').select('wallpaper_id').eq('user_id', user.id),
+      supabase.from('ringtone_favorites').select('ringtone:ringtones(id, title, slug, cover_image_url)').eq('user_id', user.id),
+      supabase.from('live_wallpaper_favorites').select('live_wallpaper_id').eq('user_id', user.id),
+    ]).then(async ([wallFavRes, ringRes, liveFavRes]) => {
+      // Fetch wallpapers by IDs directly
+      const wallpaperIds = (wallFavRes.data || []).map((r: any) => r.wallpaper_id).filter(Boolean)
+      const liveIds = (liveFavRes.data || []).map((r: any) => r.live_wallpaper_id).filter(Boolean)
+
+      const [wallData, liveData] = await Promise.all([
+        wallpaperIds.length > 0
+          ? supabase.from('wallpapers').select('id, title, slug, thumbnail_url, is_premium').in('id', wallpaperIds)
+          : Promise.resolve({ data: [] }),
+        liveIds.length > 0
+          ? supabase.from('live_wallpapers').select('id, title, slug, thumbnail_url, video_url').in('id', liveIds)
+          : Promise.resolve({ data: [] }),
+      ])
+
+      setWallpapers((wallData.data || []) as FavoriteWallpaper[])
       setRingtones((ringRes.data || []).map((r: any) => r.ringtone).filter(Boolean))
-      setLiveWallpapers((liveRes.data || []).map((r: any) => r.live_wallpaper).filter(Boolean))
+      setLiveWallpapers((liveData.data || []) as FavoriteLive[])
     }).finally(() => setFetching(false))
   }, [user])
 
@@ -154,15 +210,7 @@ export default function FavoritesPage() {
               ? <Empty label="live wallpapers" href="/live-wallpapers" />
               : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                   {liveWallpapers.map((lw) => (
-                    <Link key={lw.id} href={`/live-wallpaper/${lw.slug}`} className="group relative rounded-lg overflow-hidden bg-gray-800 aspect-[9/16] block">
-                      {lw.thumbnail_url && <Image src={lw.thumbnail_url} alt={lw.title} fill sizes="16vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
-                        <div className="bg-black/60 rounded-full p-2">
-                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                        </div>
-                      </div>
-                      <p className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium line-clamp-1 opacity-0 group-hover:opacity-100 transition-opacity">{lw.title}</p>
-                    </Link>
+                    <FavoriteLiveCard key={lw.id} lw={lw} />
                   ))}
                 </div>
           )}

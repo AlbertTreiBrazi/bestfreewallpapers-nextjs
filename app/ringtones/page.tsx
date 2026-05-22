@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useAuth } from '@/contexts/AuthContext'
-import type { Ringtone } from '@/types'
+import type { Ringtone, RingtoneCategory } from '@/types'
 
 const LIMIT = 48
 
@@ -139,6 +139,7 @@ function RingtoneCard({ ringtone }: { ringtone: Ringtone }) {
 
 export default function RingtonesPage() {
   const [ringtones, setRingtones] = useState<Ringtone[]>([])
+  const [categories, setCategories] = useState<RingtoneCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
@@ -146,6 +147,15 @@ export default function RingtonesPage() {
   const [sort, setSort] = useState<SortOption>('popular')
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    supabase
+      .from('ringtone_categories')
+      .select('id, name, slug, preview_image')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => setCategories((data || []) as RingtoneCategory[]))
+  }, [])
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400)
@@ -199,6 +209,26 @@ export default function RingtonesPage() {
           Download free ringtones for iPhone (M4R) and Android (MP3) · Click ▶ to preview
         </p>
       </div>
+
+      {/* Categories strip */}
+      {categories.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              href={`/ringtones/category/${cat.slug}`}
+              className="flex-shrink-0 flex items-center gap-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-600 text-gray-300 hover:text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-200"
+            >
+              {cat.preview_image && (
+                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
+                  <Image src={cat.preview_image} alt={cat.name} width={20} height={20} className="object-cover w-full h-full" />
+                </div>
+              )}
+              <span>{cat.name}</span>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Search + Sort */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
