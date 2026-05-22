@@ -93,7 +93,7 @@ function LiveWallpaperCard({ lw }: { lw: LiveWallpaper }) {
       <button
         onClick={handleFav}
         className={`absolute top-2 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
-          faved ? 'bg-red-500 text-white opacity-100' : 'bg-black/50 text-white opacity-0 group-hover:opacity-100'
+          faved ? 'bg-red-500 text-white opacity-100' : 'bg-black/50 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
         }`}
         aria-label={faved ? 'Remove from favorites' : 'Add to favorites'}
       >
@@ -193,21 +193,6 @@ export default function LiveWallpapersPage() {
         <p className="text-gray-400 text-sm">Hover to preview · Click to download · Animated wallpapers for iPhone and Android</p>
       </div>
 
-      {/* Categories strip */}
-      {categories.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-6">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/live-wallpapers/category/${cat.slug}`}
-              className="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-600 text-gray-300 hover:text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-200"
-            >
-              {cat.name}
-            </Link>
-          ))}
-        </div>
-      )}
-
       <div className="relative max-w-md mb-6">
         <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -221,9 +206,27 @@ export default function LiveWallpapersPage() {
         />
       </div>
 
+      {/* Categories strip */}
+      {categories.length > 0 && (
+        <div className="relative mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/live-wallpapers/category/${cat.slug}`}
+                className="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-600 text-gray-300 hover:text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-200"
+              >
+                {cat.name}
+              </Link>
+            ))}
+          </div>
+          <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-gray-950 to-transparent pointer-events-none" />
+        </div>
+      )}
+
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          {Array.from({ length: 12 }).map((_, i) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="aspect-[9/16] rounded-xl bg-gray-800 animate-pulse" />
           ))}
         </div>
@@ -235,7 +238,7 @@ export default function LiveWallpapersPage() {
       ) : (
         <>
           <p className="text-gray-500 text-sm mb-4">{wallpapers.length} live wallpapers</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {wallpapers.map((lw) => <LiveWallpaperCard key={lw.id} lw={lw} />)}
           </div>
           {hasMore && (
