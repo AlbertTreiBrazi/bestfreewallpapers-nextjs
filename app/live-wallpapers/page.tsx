@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { LiveWallpaper } from '@/types'
 
-interface LiveCategory { id: number; name: string; slug: string; preview_image: string | null }
+interface LiveCategory { id: number; name: string; slug: string }
 
 const LIMIT = 48
 
@@ -136,7 +136,7 @@ export default function LiveWallpapersPage() {
   useEffect(() => {
     supabase
       .from('live_wallpaper_categories')
-      .select('id, name, slug, preview_image')
+      .select('id, name, slug')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .then(({ data }) => setCategories((data || []) as LiveCategory[]))
@@ -200,14 +200,9 @@ export default function LiveWallpapersPage() {
             <Link
               key={cat.id}
               href={`/live-wallpapers/category/${cat.slug}`}
-              className="flex-shrink-0 flex items-center gap-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-600 text-gray-300 hover:text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-200"
+              className="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-600 text-gray-300 hover:text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-200"
             >
-              {cat.preview_image && (
-                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
-                  <Image src={cat.preview_image} alt={cat.name} width={20} height={20} className="object-cover w-full h-full" />
-                </div>
-              )}
-              <span>{cat.name}</span>
+              {cat.name}
             </Link>
           ))}
         </div>
