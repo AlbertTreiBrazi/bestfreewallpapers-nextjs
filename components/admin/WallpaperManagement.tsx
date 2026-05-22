@@ -1453,15 +1453,15 @@ export function WallpaperManagement() {
                     type="text"
                     value={formData.tags}
                     onChange={(e) => updateFormData({ tags: e.target.value })}
-                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     placeholder="abstract, nature, fantasy, space"
                   />
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  <p className="mt-1 text-xs text-gray-400">
                     Nu pune tag "ai" aici. AI este controlat separat prin bifa de mai jos.
                   </p>
                 </div>
 
-                <div className="lg:col-span-2 flex items-center gap-3 p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                <div className="lg:col-span-2 flex items-center gap-3 p-4 rounded-lg bg-purple-900/20 border border-purple-800">
                   <input
                     type="checkbox"
                     id="is_ai"
