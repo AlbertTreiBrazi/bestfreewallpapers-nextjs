@@ -110,7 +110,7 @@ export default async function HomePage() {
               See all →
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {wallpapers.map((w: any) => (
               <WallpaperCard
                 key={w.id}
@@ -131,13 +131,13 @@ export default async function HomePage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Live Wallpapers</h2>
-                <p className="text-gray-400 text-sm">Animated wallpapers for iPhone & Android · hover to preview</p>
+                <p className="text-gray-400 text-sm">Animated wallpapers for iPhone &amp; Android · hover to preview</p>
               </div>
               <Link href="/live-wallpapers" className="text-green-400 hover:text-green-300 text-sm font-medium whitespace-nowrap">
                 See all →
               </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {liveWallpapers.map((lw: any) => <HomeLiveCard key={lw.id} lw={lw} />)}
             </div>
           </section>
@@ -149,13 +149,13 @@ export default async function HomePage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Free Ringtones</h2>
-                <p className="text-gray-400 text-sm">MP3 & M4R ringtones for iPhone and Android · click ▶ to preview</p>
+                <p className="text-gray-400 text-sm">MP3 &amp; M4R ringtones for iPhone and Android · click ▶ to preview</p>
               </div>
               <Link href="/ringtones" className="text-green-400 hover:text-green-300 text-sm font-medium whitespace-nowrap">
                 See all →
               </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {ringtones.map((r: any) => <HomeRingtoneCard key={r.id} ringtone={r} />)}
             </div>
           </section>
@@ -196,7 +196,7 @@ export default async function HomePage() {
         )}
 
         {/* 6. SEO TEXT BLOCK */}
-        <section className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 md:p-8">
+        <section className="border-t border-gray-800 pt-10">
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4">About BestFreeWallpapers</h2>
           <div className="text-gray-400 text-sm leading-relaxed space-y-3">
             <p>

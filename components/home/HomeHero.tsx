@@ -33,58 +33,48 @@ export default function HomeHero({ stats }: { stats: { wallpapers: number; ringt
         backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(34, 197, 94, 0.15), transparent 50%), radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.12), transparent 50%)'
       }} />
 
-      <div className="relative max-w-5xl mx-auto px-4 py-12 md:py-20 text-center">
+      <div className="relative max-w-7xl mx-auto px-4 py-12 md:py-20 text-center">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 bg-green-900/30 border border-green-700/30 text-green-300 px-3 py-1 rounded-full text-xs font-medium mb-6">
           <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-          {stats.wallpapers}+ wallpapers · {stats.ringtones}+ ringtones · {stats.live}+ live wallpapers · all free
+          {stats.wallpapers}+ free wallpapers, live wallpapers &amp; ringtones — no sign-up
         </div>
 
-        {/* H1 */}
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
-          Best Free Wallpapers<br />
-          <span className="bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
-            for iPhone & Android
-          </span>
-        </h1>
+        {/* Text + search constrained to readable width */}
+        <div className="max-w-3xl mx-auto">
+          {/* H1 */}
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
+            Best Free Wallpapers<br />
+            <span className="bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
+              for iPhone & Android
+            </span>
+          </h1>
 
-        <p className="text-gray-400 text-base md:text-lg mb-8 max-w-2xl mx-auto">
-          Free 4K &amp; HD wallpapers for iPhone lock screen and Android, animated live wallpapers, and free ringtones. No registration, no watermarks.
-        </p>
+          <p className="text-gray-400 text-base md:text-lg mb-8 mx-auto">
+            Free 4K &amp; HD wallpapers for iPhone lock screen and Android, animated live wallpapers, and free ringtones. No registration, no watermarks.
+          </p>
 
-        {/* Search bar */}
-        <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-6">
-          <div className="relative">
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search wallpapers, ringtones, categories..."
-              className="w-full bg-gray-800/80 backdrop-blur-sm border border-gray-700 hover:border-gray-600 focus:border-green-600 text-white placeholder-gray-500 rounded-2xl pl-12 pr-32 py-4 text-base focus:outline-none transition-colors"
-            />
-            <button
-              type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-700 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
-            >
-              Search
-            </button>
-          </div>
-        </form>
-
-        {/* Quick nav to content types */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
-          <a href="#wallpapers" className="bg-gray-800/70 hover:bg-gray-700 border border-gray-700 text-gray-200 text-xs font-medium px-4 py-1.5 rounded-full transition-all">
-            Wallpapers
-          </a>
-          <a href="#live-wallpapers" className="bg-gray-800/70 hover:bg-gray-700 border border-gray-700 text-gray-200 text-xs font-medium px-4 py-1.5 rounded-full transition-all">
-            Live Wallpapers
-          </a>
-          <a href="#ringtones" className="bg-gray-800/70 hover:bg-gray-700 border border-gray-700 text-gray-200 text-xs font-medium px-4 py-1.5 rounded-full transition-all">
-            Ringtones
-          </a>
+          {/* Search bar */}
+          <form onSubmit={handleSearch} className="mb-8">
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search wallpapers, ringtones, categories..."
+                className="w-full bg-gray-800/80 backdrop-blur-sm border border-gray-700 hover:border-gray-600 focus:border-green-600 text-white placeholder-gray-500 rounded-2xl pl-12 pr-32 py-4 text-base focus:outline-none transition-colors"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-700 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+              >
+                Search
+              </button>
+            </div>
+          </form>
         </div>
 
         {/* Category tags */}

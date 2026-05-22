@@ -71,7 +71,7 @@ export default function HomeRingtoneCard({ ringtone }: Props) {
 
         <button
           onClick={handlePlayPause}
-          className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${playing ? 'bg-black/40 opacity-100' : 'bg-black/0 opacity-0 group-hover:opacity-100 group-hover:bg-black/30'}`}
+          className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${playing ? 'bg-black/40 opacity-100' : 'bg-black/0 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-hover:bg-black/30'}`}
           aria-label={playing ? 'Pause' : 'Play preview'}
         >
           <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
