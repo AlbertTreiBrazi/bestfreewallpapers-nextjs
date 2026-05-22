@@ -979,7 +979,7 @@ export function WallpaperManagement() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-gray-800 text-gray-100"
               >
                 <option value="all">All Categories</option>
                 {categories.map((category) => (
@@ -1390,7 +1390,7 @@ export function WallpaperManagement() {
                   <select
                     value={formData.device_type}
                     onChange={(e) => updateFormData({ device_type: e.target.value })}
-                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-gray-800 text-gray-100"
                   >
                     <option value="desktop">Desktop</option>
                     <option value="mobile">Mobile</option>
@@ -1412,10 +1412,10 @@ export function WallpaperManagement() {
                     type="number"
                     value={formData.width}
                     onChange={(e) => updateFormData({ width: parseInt(e.target.value) || 1620 })}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent ${
-                      isUsingDefaults && formData.width === 1620 
-                        ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20' 
-                        : 'border-theme-light'
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-gray-100 ${
+                      isUsingDefaults && formData.width === 1620
+                        ? 'border-green-600 bg-green-900/30'
+                        : 'border-theme-light bg-gray-800'
                     }`}
                     placeholder="1620 (mobile default)"
                   />
@@ -1438,10 +1438,10 @@ export function WallpaperManagement() {
                     type="number"
                     value={formData.height}
                     onChange={(e) => updateFormData({ height: parseInt(e.target.value) || 2880 })}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent ${
-                      isUsingDefaults && formData.height === 2880 
-                        ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20' 
-                        : 'border-theme-light'
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-gray-100 ${
+                      isUsingDefaults && formData.height === 2880
+                        ? 'border-green-600 bg-green-900/30'
+                        : 'border-theme-light bg-gray-800'
                     }`}
                     placeholder="2880 (mobile default)"
                   />
