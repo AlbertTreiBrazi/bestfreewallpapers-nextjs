@@ -52,7 +52,7 @@ export interface LiveWallpaper {
   title: string
   slug: string
   description: string | null
-  video_url: string
+  video_url: string | null
   thumbnail_url: string | null
   duration_seconds: number | null
   tags: string[] | null

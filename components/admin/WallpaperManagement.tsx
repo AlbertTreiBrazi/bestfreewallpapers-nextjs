@@ -1037,18 +1037,18 @@ export function WallpaperManagement() {
                     {/* Badges */}
                     <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                       {wallpaper.is_premium && (
-                        <span className="inline-flex items-center px-2 py-1 bg-yellow-500 dark:bg-yellow-600 text-white text-xs font-semibold rounded-full shadow-sm">
+                        <span className="inline-flex items-center px-2 py-1 bg-yellow-500 text-white text-xs font-semibold rounded-full shadow-sm">
                           <Crown className="w-3 h-3 mr-1" />
                           Premium
                         </span>
                       )}
                       {!wallpaper.is_published && (
-                        <span className="px-2 py-1 bg-red-500 dark:bg-red-600 text-white text-xs font-semibold rounded-full shadow-sm">
+                        <span className="px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded-full shadow-sm">
                           Draft
                         </span>
                       )}
                       {!wallpaper.is_active && (
-                        <span className="px-2 py-1 bg-gray-500 dark:bg-gray-600 text-white text-xs font-semibold rounded-full shadow-sm">
+                        <span className="px-2 py-1 bg-gray-600 text-white text-xs font-semibold rounded-full shadow-sm">
                           Inactive
                         </span>
                       )}
@@ -1165,7 +1165,7 @@ export function WallpaperManagement() {
               {collections.map((collection) => (
                 <div key={collection.id} className="group relative bg-theme-muted rounded-lg overflow-hidden">
                   {/* Collection Thumbnail */}
-                  <div className="aspect-video overflow-hidden bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30">
+                  <div className="aspect-video overflow-hidden bg-gradient-to-br from-purple-900/30 to-blue-900/30">
                     {collection.thumbnail_url || collection.cover_image_url ? (
                       <img
                         src={(collection.thumbnail_url || collection.cover_image_url) ?? undefined}
@@ -1174,7 +1174,7 @@ export function WallpaperManagement() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <ImageIcon className="w-12 h-12 text-purple-300 dark:text-purple-600" />
+                        <ImageIcon className="w-12 h-12 text-purple-400" />
                       </div>
                     )}
                   </div>
@@ -1182,12 +1182,12 @@ export function WallpaperManagement() {
                   {/* Collection Badges */}
                   <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                     {collection.is_featured && (
-                      <span className="inline-flex items-center px-2 py-1 bg-yellow-500 dark:bg-yellow-600 text-white text-xs font-semibold rounded-full shadow-sm">
+                      <span className="inline-flex items-center px-2 py-1 bg-yellow-500 text-white text-xs font-semibold rounded-full shadow-sm">
                         Featured
                       </span>
                     )}
                     {!collection.is_published && !collection.is_active && (
-                      <span className="px-2 py-1 bg-red-500 dark:bg-red-600 text-white text-xs font-semibold rounded-full shadow-sm">
+                      <span className="px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded-full shadow-sm">
                         Draft
                       </span>
                     )}
@@ -1290,7 +1290,7 @@ export function WallpaperManagement() {
                         <span className="text-xs text-theme-secondary">Form auto-saved</span>
                       </div>
                       {isUsingDefaults && (
-                        <span className="text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-2 py-1 rounded-full">
+                        <span className="text-xs text-blue-300 bg-blue-900/30 border border-blue-800 px-2 py-1 rounded-full">
                           Using mobile defaults (1620×2880)
                         </span>
                       )}
@@ -1348,10 +1348,10 @@ export function WallpaperManagement() {
                           }
                         }
                       }}
-                      className="block w-full text-sm text-theme-tertiary file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 dark:file:bg-purple-900/30 file:text-gray-700 dark:file:text-purple-200 hover:file:bg-purple-100 dark:hover:file:bg-purple-900/50"
+                      className="block w-full text-sm text-theme-tertiary file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-900/30 file:text-purple-200 hover:file:bg-purple-800/50"
                     />
                     {uploading && (
-                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Uploading image...</p>
+                      <p className="mt-2 text-sm text-gray-400">Uploading image...</p>
                     )}
                   </div>
                 </div>
@@ -1403,7 +1403,7 @@ export function WallpaperManagement() {
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium text-theme-secondary">Width</label>
                     {isUsingDefaults && (
-                      <span className="text-xs text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-2 py-1 rounded-full">
+                      <span className="text-xs text-green-300 bg-green-900/30 border border-green-800 px-2 py-1 rounded-full">
                         Mobile Optimized
                       </span>
                     )}
@@ -1428,7 +1428,7 @@ export function WallpaperManagement() {
                       <button
                         type="button"
                         onClick={resetToDefaults}
-                        className="text-xs text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800 px-2 py-1 rounded-full transition-colors"
+                        className="text-xs text-blue-300 hover:text-blue-200 bg-blue-900/30 hover:bg-blue-900/50 border border-blue-800 px-2 py-1 rounded-full transition-colors"
                       >
                         Reset to Defaults
                       </button>
@@ -1783,13 +1783,13 @@ export function WallpaperManagement() {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => setSelectedWallpaperIds(new Set())}
-                          className="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                          className="px-3 py-1 text-xs bg-red-900/30 text-red-300 border border-red-800 rounded hover:bg-red-900/50 transition-colors"
                         >
                           Clear All
                         </button>
                         <button
                           onClick={() => setSelectedWallpaperIds(new Set(availableWallpapers.map((w: any) => w.id)))}
-                          className="px-3 py-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+                          className="px-3 py-1 text-xs bg-green-900/30 text-green-300 border border-green-800 rounded hover:bg-green-900/50 transition-colors"
                         >
                           Select All
                         </button>
@@ -1809,8 +1809,8 @@ export function WallpaperManagement() {
                               key={wallpaper.id}
                               className={`relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
                                 isSelected
-                                  ? 'border-green-500 dark:border-green-600 ring-2 ring-green-200 dark:ring-green-800'
-                                  : 'border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700'
+                                  ? 'border-green-500 ring-2 ring-green-800'
+                                  : 'border-gray-700 hover:border-purple-700'
                               }`}
                               onClick={() => handleWallpaperToggle(wallpaper.id)}
                             >
@@ -1824,10 +1824,10 @@ export function WallpaperManagement() {
                               </div>
 
                               {/* Selection Overlay */}
-                              <div className={`absolute inset-0 bg-green-500 dark:bg-green-600 bg-opacity-20 dark:bg-opacity-30 transition-opacity ${
+                              <div className={`absolute inset-0 bg-green-600 bg-opacity-30 transition-opacity ${
                                 isSelected ? 'opacity-100' : 'opacity-0'
                               }`}>
-                                <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 dark:bg-green-600 rounded-full flex items-center justify-center shadow-sm">
+                                <div className="absolute top-2 right-2 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center shadow-sm">
                                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                   </svg>
@@ -1843,7 +1843,7 @@ export function WallpaperManagement() {
                               {/* Premium Badge */}
                               {wallpaper.is_premium && (
                                 <div className="absolute top-2 left-2">
-                                  <span className="inline-flex items-center px-2 py-1 bg-yellow-500 dark:bg-yellow-600 text-white text-xs font-semibold rounded-full shadow-sm">
+                                  <span className="inline-flex items-center px-2 py-1 bg-yellow-500 text-white text-xs font-semibold rounded-full shadow-sm">
                                     <Crown className="w-3 h-3 mr-1" />
                                     Premium
                                   </span>

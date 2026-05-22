@@ -25,7 +25,7 @@ function RelatedLiveCard({ w }: { w: LiveWallpaper }) {
         : <>
             <video
               ref={videoRef}
-              src={w.video_url}
+              src={w.video_url ?? undefined}
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${frameReady ? 'opacity-100' : 'opacity-0'}`}
               preload="metadata"
               muted
@@ -61,7 +61,7 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
       id: lw.id,
       title: lw.title,
       slug: lw.slug,
-      url: lw.video_url,
+      url: lw.video_url ?? '',
       type: 'live',
       is_premium: lw.is_premium,
     })
@@ -83,7 +83,7 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
           {/* Video preview */}
           <div className="relative aspect-[9/16] max-h-[70vh] w-full mx-auto rounded-2xl overflow-hidden bg-gray-800 shadow-2xl" onContextMenu={(e) => e.preventDefault()}>
             <video
-              src={lw.video_url}
+              src={lw.video_url ?? undefined}
               poster={lw.thumbnail_url || undefined}
               autoPlay muted loop playsInline onContextMenu={(e) => e.preventDefault()} controlsList="nodownload"
               className="absolute inset-0 w-full h-full object-cover"

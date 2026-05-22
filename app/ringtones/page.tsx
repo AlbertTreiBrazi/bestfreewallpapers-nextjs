@@ -33,7 +33,8 @@ function RingtoneCard({ ringtone }: { ringtone: Ringtone }) {
       setPlaying(false)
     } else {
       audioRef.current.play()
-      setPlaying(true)
+        .then(() => setPlaying(true))
+        .catch(() => {})
     }
   }
 
@@ -144,6 +145,7 @@ export default function RingtonesPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
+  const pageRef = useRef(0)
   const [sort, setSort] = useState<SortOption>('popular')
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -166,7 +168,7 @@ export default function RingtonesPage() {
     if (reset) setLoading(true)
     else setLoadingMore(true)
 
-    const from = reset ? 0 : page * LIMIT
+    const from = reset ? 0 : pageRef.current * LIMIT
     const to = from + LIMIT - 1
 
     let query = supabase
@@ -186,16 +188,18 @@ export default function RingtonesPage() {
 
     if (reset) {
       setRingtones(items)
+      pageRef.current = 1
       setPage(1)
     } else {
       setRingtones(prev => [...prev, ...items])
+      pageRef.current += 1
       setPage(p => p + 1)
     }
 
     setHasMore(items.length === LIMIT)
     setLoading(false)
     setLoadingMore(false)
-  }, [sort, debouncedSearch, page])
+  }, [sort, debouncedSearch])
 
   useEffect(() => {
     fetchRingtones(true)

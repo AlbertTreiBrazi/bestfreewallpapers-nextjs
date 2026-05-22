@@ -9,14 +9,30 @@ import AuthModal from '@/components/auth/AuthModal'
 
 function FavoriteLiveCard({ lw }: { lw: FavoriteLive }) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const cardRef = useRef<HTMLAnchorElement>(null)
   const [playing, setPlaying] = useState(false)
+  const [videoLoaded, setVideoLoaded] = useState(false)
+
+  // Lazy-load video only when card enters viewport
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVideoLoaded(true) },
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const handleEnter = () => {
-    if (videoRef.current && lw.video_url) {
-      videoRef.current.play().catch(() => {})
-      setPlaying(true)
+    if (videoRef.current && lw.video_url && videoLoaded) {
+      videoRef.current.play()
+        .then(() => setPlaying(true))
+        .catch(() => {})
     }
   }
+
   const handleLeave = () => {
     if (videoRef.current) {
       videoRef.current.pause()
@@ -27,10 +43,13 @@ function FavoriteLiveCard({ lw }: { lw: FavoriteLive }) {
 
   return (
     <Link
+      ref={cardRef}
       href={`/live-wallpaper/${lw.slug}`}
       className="group relative rounded-lg overflow-hidden bg-gray-800 aspect-[9/16] block"
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
+      onTouchStart={handleEnter}
+      onTouchEnd={handleLeave}
     >
       {lw.thumbnail_url && (
         <Image
@@ -41,7 +60,7 @@ function FavoriteLiveCard({ lw }: { lw: FavoriteLive }) {
           className={`object-cover transition-opacity duration-300 ${playing ? 'opacity-0' : 'opacity-100'}`}
         />
       )}
-      {lw.video_url && (
+      {videoLoaded && lw.video_url && (
         <video
           ref={videoRef}
           src={lw.video_url}
@@ -69,7 +88,7 @@ interface FavoriteRingtone {
   id: number; title: string; slug: string; cover_image_url: string | null
 }
 interface FavoriteLive {
-  id: number; title: string; slug: string; thumbnail_url: string | null; video_url?: string
+  id: number; title: string; slug: string; thumbnail_url: string | null; video_url: string | null
 }
 
 export default function FavoritesPage() {
@@ -78,19 +97,19 @@ export default function FavoritesPage() {
   const [ringtones, setRingtones] = useState<FavoriteRingtone[]>([])
   const [liveWallpapers, setLiveWallpapers] = useState<FavoriteLive[]>([])
   const [fetching, setFetching] = useState(false)
+  const [fetchError, setFetchError] = useState(false)
   const [authOpen, setAuthOpen] = useState(false)
   const [tab, setTab] = useState<'wallpapers' | 'ringtones' | 'live'>('wallpapers')
 
   useEffect(() => {
     if (!user) return
     setFetching(true)
+    setFetchError(false)
     Promise.all([
-      // Two-step: get IDs first, then fetch wallpapers directly (avoids join RLS issues)
       supabase.from('favorites').select('wallpaper_id').eq('user_id', user.id),
       supabase.from('ringtone_favorites').select('ringtone:ringtones(id, title, slug, cover_image_url)').eq('user_id', user.id),
       supabase.from('live_wallpaper_favorites').select('live_wallpaper_id').eq('user_id', user.id),
     ]).then(async ([wallFavRes, ringRes, liveFavRes]) => {
-      // Fetch wallpapers by IDs directly
       const wallpaperIds = (wallFavRes.data || []).map((r: any) => r.wallpaper_id).filter(Boolean)
       const liveIds = (liveFavRes.data || []).map((r: any) => r.live_wallpaper_id).filter(Boolean)
 
@@ -106,6 +125,8 @@ export default function FavoritesPage() {
       setWallpapers((wallData.data || []) as FavoriteWallpaper[])
       setRingtones((ringRes.data || []).map((r: any) => r.ringtone).filter(Boolean))
       setLiveWallpapers((liveData.data || []) as FavoriteLive[])
+    }).catch(() => {
+      setFetchError(true)
     }).finally(() => setFetching(false))
   }, [user])
 
@@ -152,7 +173,6 @@ export default function FavoritesPage() {
         </p>
       </div>
 
-      {/* Tabs */}
       <div className="flex bg-gray-800 rounded-xl p-1 mb-8 max-w-xs">
         {tabs.map(({ key, label, count }) => (
           <button
@@ -168,6 +188,11 @@ export default function FavoritesPage() {
       {fetching ? (
         <div className="flex justify-center py-20">
           <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : fetchError ? (
+        <div className="text-center py-20">
+          <p className="text-gray-400 mb-3">Could not load favorites. Please try again.</p>
+          <button onClick={() => window.location.reload()} className="text-green-400 hover:text-green-300 text-sm">Retry</button>
         </div>
       ) : (
         <>

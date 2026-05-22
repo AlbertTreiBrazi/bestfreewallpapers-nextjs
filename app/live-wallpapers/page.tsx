@@ -81,7 +81,7 @@ function LiveWallpaperCard({ lw }: { lw: LiveWallpaper }) {
       {videoLoaded && (
         <video
           ref={videoRef}
-          src={lw.video_url}
+          src={lw.video_url ?? undefined}
           className="absolute inset-0 w-full h-full object-cover"
           loop muted playsInline
           preload={lw.thumbnail_url ? 'none' : 'metadata'}
@@ -129,6 +129,7 @@ export default function LiveWallpapersPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
+  const pageRef = useRef(0)
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
 
@@ -150,7 +151,7 @@ export default function LiveWallpapersPage() {
     if (reset) setLoading(true)
     else setLoadingMore(true)
 
-    const from = reset ? 0 : page * LIMIT
+    const from = reset ? 0 : pageRef.current * LIMIT
     const to = from + LIMIT - 1
 
     let query = supabase
@@ -168,16 +169,18 @@ export default function LiveWallpapersPage() {
 
     if (reset) {
       setWallpapers(items)
+      pageRef.current = 1
       setPage(1)
     } else {
       setWallpapers(prev => [...prev, ...items])
+      pageRef.current += 1
       setPage(p => p + 1)
     }
 
     setHasMore(items.length === LIMIT)
     setLoading(false)
     setLoadingMore(false)
-  }, [debouncedSearch, page])
+  }, [debouncedSearch])
 
   useEffect(() => {
     fetchWallpapers(true)
@@ -217,7 +220,7 @@ export default function LiveWallpapersPage() {
         <input
           type="search"
           value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(0) }}
+          onChange={(e) => setSearch(e.target.value)}
           placeholder="Search live wallpapers..."
           className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-green-600"
         />
