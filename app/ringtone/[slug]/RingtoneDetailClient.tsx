@@ -7,6 +7,7 @@ import { useDownload } from '@/hooks/useDownload'
 import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
+import ShareButton from '@/components/ui/ShareButton'
 import type { Ringtone } from '@/types'
 
 interface Props {
@@ -78,7 +79,10 @@ export default function RingtoneDetailClient({ ringtone, related }: Props) {
             <div className="flex-1 text-center sm:text-left">
               <div className="flex items-start gap-3 mb-2">
               <h1 className="text-2xl font-bold text-white flex-1">{ringtone.title}</h1>
-              <FavoriteButton id={ringtone.id} type="ringtone" size="md" />
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <ShareButton title={ringtone.title} />
+                <FavoriteButton id={ringtone.id} type="ringtone" size="md" />
+              </div>
             </div>
               {ringtone.description && (
                 <p className="text-gray-400 mb-4 text-sm leading-relaxed">{ringtone.description}</p>
@@ -91,7 +95,7 @@ export default function RingtoneDetailClient({ ringtone, related }: Props) {
               {ringtone.tags && ringtone.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                   {ringtone.tags.slice(0, 6).map((tag) => (
-                    <span key={tag} className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded-full">#{tag}</span>
+                    <Link key={tag} href={`/tag/${encodeURIComponent(tag)}`} className="bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white text-xs px-2 py-1 rounded-full transition-colors">#{tag}</Link>
                   ))}
                 </div>
               )}

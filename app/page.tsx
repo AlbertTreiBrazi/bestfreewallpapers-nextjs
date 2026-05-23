@@ -41,12 +41,12 @@ async function getHomepageData() {
       .order('download_count', { ascending: false })
       .limit(8),
     supabase.from('ringtones')
-      .select('id, title, slug, cover_image_url, audio_url, duration_seconds, downloads_count, is_premium')
+      .select('id, title, slug, cover_image_url, audio_url, duration_seconds, downloads_count, is_premium, created_at')
       .eq('is_active', true).eq('is_published', true)
       .order('downloads_count', { ascending: false })
       .limit(6),
     supabase.from('live_wallpapers')
-      .select('id, title, slug, thumbnail_url, video_url, downloads_count, is_premium, duration_seconds')
+      .select('id, title, slug, thumbnail_url, video_url, downloads_count, is_premium, duration_seconds, created_at')
       .eq('is_active', true).eq('is_published', true)
       .order('downloads_count', { ascending: false })
       .limit(6),

@@ -17,11 +17,23 @@ export const metadata: Metadata = {
   openGraph: { type: 'website', locale: 'en_US', url: 'https://bestfreewallpapers.com', siteName: 'BestFreeWallpapers' },
   twitter: { card: 'summary_large_image' },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'BestFreeWallpapers',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content="#15803d" />
+      </head>
       <body className="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
         <AuthProvider>
           <Header />

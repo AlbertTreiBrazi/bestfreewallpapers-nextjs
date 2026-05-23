@@ -100,6 +100,11 @@ function RingtoneCard({ ringtone }: { ringtone: Ringtone }) {
           </svg>
         </button>
 
+        {/* NEW badge */}
+        {!ringtone.is_premium && ringtone.created_at && Date.now() - new Date(ringtone.created_at).getTime() < 7 * 24 * 60 * 60 * 1000 && (
+          <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded font-medium z-10">NEW</div>
+        )}
+
         {/* Duration badge */}
         {ringtone.duration_seconds && (
           <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded font-medium">
@@ -180,7 +185,7 @@ export default function RingtonesPage() {
 
     let query = supabase
       .from('ringtones')
-      .select('id, title, slug, cover_image_url, audio_url, duration_seconds, downloads_count, is_premium, tags')
+      .select('id, title, slug, cover_image_url, audio_url, duration_seconds, downloads_count, is_premium, tags, created_at')
       .eq('is_active', true)
       .eq('is_published', true)
       .range(from, to)

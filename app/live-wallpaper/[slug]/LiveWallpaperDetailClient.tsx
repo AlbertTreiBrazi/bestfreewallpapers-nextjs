@@ -7,6 +7,7 @@ import { useDownload } from '@/hooks/useDownload'
 import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
+import ShareButton from '@/components/ui/ShareButton'
 import type { LiveWallpaper } from '@/types'
 
 interface Props {
@@ -98,7 +99,10 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
             <div>
               <div className="flex items-start gap-3 mb-3">
               <h1 className="text-2xl md:text-3xl font-bold text-white flex-1">{lw.title}</h1>
-              <FavoriteButton id={lw.id} type="live" size="md" />
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <ShareButton title={lw.title} />
+                <FavoriteButton id={lw.id} type="live" size="md" />
+              </div>
             </div>
               {lw.description && (
                 <p className="text-gray-400 mb-6 leading-relaxed">{lw.description}</p>
@@ -130,9 +134,9 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
               {lw.tags && lw.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6">
                   {lw.tags.slice(0, 8).map((tag) => (
-                    <span key={tag} className="bg-gray-800 text-gray-300 text-xs px-3 py-1 rounded-full border border-gray-700">
+                    <Link key={tag} href={`/tag/${encodeURIComponent(tag)}`} className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs px-3 py-1 rounded-full border border-gray-700 hover:border-gray-600 transition-colors">
                       #{tag}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -147,7 +151,8 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
                 ↓ Download Live Wallpaper
               </button>
               <p className="text-center text-xs text-gray-500">
-                Free for personal use • No registration required
+                Free for personal use • No registration required •{' '}
+                <Link href="/live-wallpapers/how-to-set" className="text-green-400 hover:text-green-300">How to set →</Link>
               </p>
             </div>
           </div>

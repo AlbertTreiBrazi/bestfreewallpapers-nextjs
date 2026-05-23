@@ -14,6 +14,7 @@ interface Props {
     audio_url: string
     duration_seconds: number | null
     downloads_count: number
+    created_at?: string
   }
 }
 
@@ -92,6 +93,10 @@ export default function HomeRingtoneCard({ ringtone }: Props) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
         </button>
+
+        {ringtone.created_at && Date.now() - new Date(ringtone.created_at).getTime() < 7 * 24 * 60 * 60 * 1000 && (
+          <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded font-medium z-10">NEW</div>
+        )}
 
         {ringtone.duration_seconds && (
           <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded font-medium">

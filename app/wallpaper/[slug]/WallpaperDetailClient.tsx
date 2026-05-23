@@ -8,6 +8,7 @@ import { useDownload } from '@/hooks/useDownload'
 import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
+import ShareButton from '@/components/ui/ShareButton'
 import type { Wallpaper } from '@/types'
 
 interface Props {
@@ -83,7 +84,10 @@ export default function WallpaperDetailClient({ wallpaper, related }: Props) {
               {/* Title + Favorite */}
               <div className="flex items-start gap-3 mb-3">
                 <h1 className="text-2xl md:text-3xl font-bold text-white flex-1">{wallpaper.title}</h1>
-                <FavoriteButton id={wallpaper.id} type="wallpaper" size="md" />
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <ShareButton title={wallpaper.title} />
+                  <FavoriteButton id={wallpaper.id} type="wallpaper" size="md" />
+                </div>
               </div>
 
               {wallpaper.description && (
@@ -118,9 +122,9 @@ export default function WallpaperDetailClient({ wallpaper, related }: Props) {
               {wallpaper.tags && wallpaper.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6">
                   {wallpaper.tags.slice(0, 8).map((tag) => (
-                    <span key={tag} className="bg-gray-800 text-gray-300 text-xs px-3 py-1 rounded-full border border-gray-700">
+                    <Link key={tag} href={`/tag/${encodeURIComponent(tag)}`} className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs px-3 py-1 rounded-full border border-gray-700 hover:border-gray-600 transition-colors">
                       #{tag}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               )}

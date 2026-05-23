@@ -5,6 +5,11 @@ import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { useFavorites } from '@/hooks/useFavorites'
 
+function isNew(createdAt?: string): boolean {
+  if (!createdAt) return false
+  return Date.now() - new Date(createdAt).getTime() < 7 * 24 * 60 * 60 * 1000
+}
+
 interface WallpaperCardProps {
   id: number
   title: string
@@ -12,9 +17,10 @@ interface WallpaperCardProps {
   thumbnail_url: string | null
   is_premium: boolean
   download_count?: number
+  created_at?: string
 }
 
-export default function WallpaperCard({ id, title, slug, thumbnail_url, is_premium, download_count }: WallpaperCardProps) {
+export default function WallpaperCard({ id, title, slug, thumbnail_url, is_premium, download_count, created_at }: WallpaperCardProps) {
   const { user } = useAuth()
   const { isFavorite, toggleFavorite } = useFavorites()
   const faved = isFavorite(id, 'wallpaper')
@@ -44,6 +50,9 @@ export default function WallpaperCard({ id, title, slug, thumbnail_url, is_premi
           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
           PRO
         </div>
+      )}
+      {!is_premium && isNew(created_at) && (
+        <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full z-10">NEW</div>
       )}
       <button onClick={handleFavorite} aria-label={faved ? 'Remove from favorites' : 'Add to favorites'}
         className={`absolute top-2 right-2 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg ${faved ? 'bg-red-500 text-white opacity-100' : 'bg-black/50 text-white opacity-0 group-hover:opacity-100'}`}>

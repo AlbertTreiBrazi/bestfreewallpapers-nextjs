@@ -14,6 +14,7 @@ interface Props {
     video_url: string
     duration_seconds?: number | null
     is_premium: boolean
+    created_at?: string
   }
 }
 
@@ -118,6 +119,9 @@ export default function HomeLiveCard({ lw }: Props) {
 
       {lw.is_premium && (
         <span className="absolute top-2 left-2 bg-yellow-500 text-black text-xs px-1.5 py-0.5 rounded font-medium">PRO</span>
+      )}
+      {!lw.is_premium && lw.created_at && Date.now() - new Date(lw.created_at).getTime() < 7 * 24 * 60 * 60 * 1000 && (
+        <span className="absolute top-2 left-2 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded font-medium">NEW</span>
       )}
 
       <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">

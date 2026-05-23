@@ -149,6 +149,7 @@ export default function WallpapersPage() {
                 thumbnail_url={w.thumbnail_url}
                 is_premium={w.is_premium}
                 download_count={w.download_count}
+                created_at={w.created_at}
               />
             ))}
           </div>
