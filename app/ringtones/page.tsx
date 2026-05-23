@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Ringtone, RingtoneCategory } from '@/types'
+import RingtoneExplore from '@/components/ringtones/RingtoneExplore'
 
 const LIMIT = 48
 
@@ -154,6 +155,7 @@ export default function RingtonesPage() {
   const [sort, setSort] = useState<SortOption>('popular')
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [exploreOpen, setExploreOpen] = useState(false)
 
   useEffect(() => {
     supabase
@@ -211,12 +213,28 @@ export default function RingtonesPage() {
   }, [sort, debouncedSearch]) // eslint-disable-line
 
   return (
+    <>
+    {exploreOpen && ringtones.length > 0 && (
+      <RingtoneExplore ringtones={ringtones} onClose={() => setExploreOpen(false)} />
+    )}
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-1">Free Ringtones</h1>
-        <p className="text-gray-400 text-sm">
-          Download free ringtones for iPhone (M4R) and Android (MP3) · Click ▶ to preview
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-1">Free Ringtones</h1>
+          <p className="text-gray-400 text-sm">
+            Download free ringtones for iPhone (M4R) and Android (MP3) · Click ▶ to preview
+          </p>
+        </div>
+        <button
+          onClick={() => setExploreOpen(true)}
+          disabled={loading || ringtones.length === 0}
+          className="flex-shrink-0 flex items-center gap-2 bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+          </svg>
+          Explore
+        </button>
       </div>
 
       {/* Search + Sort */}
@@ -306,5 +324,6 @@ export default function RingtonesPage() {
         </>
       )}
     </div>
+    </>
   )
 }
