@@ -10,6 +10,8 @@ interface LiveCategory {
   preview_image: string | null; seo_title: string | null; seo_description: string | null
 }
 
+interface NavCategory { id: number; name: string; slug: string }
+
 interface Props { params: Promise<{ slug: string }> }
 
 async function getCategory(slug: string): Promise<LiveCategory | null> {
@@ -34,6 +36,16 @@ async function getWallpapers(categorySlug: string): Promise<LiveWallpaper[]> {
     .order('downloads_count', { ascending: false })
     .limit(48)
   return (data || []) as LiveWallpaper[]
+}
+
+async function getAllCategories(): Promise<NavCategory[]> {
+  const supabase = createServerSupabaseClient()
+  const { data } = await supabase
+    .from('live_wallpaper_categories')
+    .select('id, name, slug')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true })
+  return (data || []) as NavCategory[]
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -61,10 +73,12 @@ export const revalidate = 3600
 
 export default async function LiveCategoryPage({ params }: Props) {
   const { slug } = await params
-  const cat = await getCategory(slug)
+  const [cat, wallpapers, allCats] = await Promise.all([
+    getCategory(slug),
+    getWallpapers(slug),
+    getAllCategories(),
+  ])
   if (!cat) notFound()
-
-  const wallpapers = await getWallpapers(slug)
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -76,27 +90,40 @@ export default async function LiveCategoryPage({ params }: Props) {
         <span className="text-gray-300">{cat.name}</span>
       </nav>
 
-      {/* Hero */}
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 mb-10 border border-gray-700">
-        <div className="flex items-center gap-4 mb-3">
-          <div className="w-14 h-14 bg-green-700/30 rounded-2xl flex items-center justify-center">
-            <svg className="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">{cat.name} Live Wallpapers</h1>
-            <p className="text-gray-400 text-sm mt-1">{wallpapers.length} wallpapers available</p>
-          </div>
-        </div>
-        {cat.description && <p className="text-gray-300 leading-relaxed">{cat.description}</p>}
-        <div className="flex flex-wrap gap-3 mt-5">
+      {/* Hero — slimmed down */}
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-5 sm:p-6 mb-4 border border-gray-700">
+        <h1 className="text-xl md:text-2xl font-bold text-white mb-1">{cat.name} Live Wallpapers</h1>
+        <p className="text-gray-400 text-sm mb-3">{wallpapers.length} wallpapers available</p>
+        {cat.description && <p className="text-gray-300 text-sm leading-relaxed mb-4">{cat.description}</p>}
+        <div className="flex flex-wrap gap-2">
           <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full">✓ Free Download</span>
           <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full">✓ MP4 Format</span>
-          <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full">✓ iPhone & Android</span>
+          <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full">✓ iPhone &amp; Android</span>
           <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full">✓ No registration</span>
         </div>
       </div>
+
+      {/* Category nav strip — active category highlighted */}
+      {allCats.length > 0 && (
+        <div className="relative mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {allCats.map((c) => (
+              <Link
+                key={c.id}
+                href={`/live-wallpapers/category/${c.slug}`}
+                className={`flex-shrink-0 text-sm font-medium px-4 py-2 rounded-full border transition-all duration-200 ${
+                  c.slug === slug
+                    ? 'bg-green-700 border-green-600 text-white'
+                    : 'bg-gray-800 hover:bg-gray-700 border-gray-700 hover:border-green-600 text-gray-300 hover:text-white'
+                }`}
+              >
+                {c.name}
+              </Link>
+            ))}
+          </div>
+          <div className="absolute right-0 top-0 bottom-2 w-10 bg-gradient-to-l from-gray-950 to-transparent pointer-events-none" />
+        </div>
+      )}
 
       {wallpapers.length === 0 ? (
         <div className="text-center py-20 text-gray-500">
@@ -121,7 +148,12 @@ export default async function LiveCategoryPage({ params }: Props) {
                 />
               )}
               {lw.is_premium && (
-                <span className="absolute top-2 left-2 bg-yellow-500 text-black text-xs px-1.5 py-0.5 rounded font-medium">PRO</span>
+                <span className="absolute top-2 left-2 bg-yellow-500 text-black text-xs px-1.5 py-0.5 rounded font-medium z-10">PRO</span>
+              )}
+              {lw.duration_seconds && (
+                <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded font-medium z-10">
+                  {lw.duration_seconds}s
+                </span>
               )}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
                 <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">

@@ -67,13 +67,13 @@ function RingtoneCard({ ringtone }: { ringtone: Ringtone }) {
           </div>
         )}
 
-        {/* Play button overlay */}
+        {/* Play button overlay — always visible on mobile */}
         <button
           onClick={handlePlayPause}
-          className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${playing ? 'bg-black/40 opacity-100' : 'bg-black/0 opacity-0 group-hover:opacity-100 group-hover:bg-black/30'}`}
+          className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${playing ? 'bg-black/40' : 'bg-black/0'}`}
           aria-label={playing ? 'Pause' : 'Play preview'}
         >
-          <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
+          <div className={`w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 transition-all duration-200 ${playing ? 'scale-110' : 'scale-100'}`}>
             {playing ? (
               <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
@@ -86,11 +86,11 @@ function RingtoneCard({ ringtone }: { ringtone: Ringtone }) {
           </div>
         </button>
 
-        {/* Favorite button */}
+        {/* Favorite button — always visible on mobile */}
         <button
           onClick={handleFav}
           className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
-            faved ? 'bg-red-500 text-white opacity-100' : 'bg-black/50 text-white opacity-0 group-hover:opacity-100'
+            faved ? 'bg-red-500 text-white opacity-100' : 'bg-black/50 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
           }`}
           aria-label={faved ? 'Remove from favorites' : 'Add to favorites'}
         >
@@ -127,6 +127,11 @@ function RingtoneCard({ ringtone }: { ringtone: Ringtone }) {
       {/* Info */}
       <div className="p-3">
         <p className="text-white text-sm font-medium line-clamp-1 mb-1">{ringtone.title}</p>
+        {ringtone.tags && ringtone.tags.length > 0 && (
+          <p className="text-gray-500 text-xs line-clamp-1 mb-1">
+            {ringtone.tags.slice(0, 2).map(t => `#${t}`).join(' ')}
+          </p>
+        )}
         <div className="flex items-center justify-between">
           <span className="text-gray-400 text-xs">⬇ {(ringtone.downloads_count || 0).toLocaleString()}</span>
           {ringtone.is_premium && (
@@ -173,7 +178,7 @@ export default function RingtonesPage() {
 
     let query = supabase
       .from('ringtones')
-      .select('id, title, slug, cover_image_url, audio_url, duration_seconds, downloads_count, is_premium')
+      .select('id, title, slug, cover_image_url, audio_url, duration_seconds, downloads_count, is_premium, tags')
       .eq('is_active', true)
       .eq('is_published', true)
       .range(from, to)
@@ -262,7 +267,7 @@ export default function RingtonesPage() {
 
       {/* Grid */}
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="rounded-xl bg-gray-800 animate-pulse">
               <div className="aspect-square" />
@@ -281,7 +286,7 @@ export default function RingtonesPage() {
       ) : (
         <>
           <p className="text-gray-500 text-sm mb-4">{ringtones.length} ringtones</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {ringtones.map((r) => <RingtoneCard key={r.id} ringtone={r} />)}
           </div>
           {hasMore && (
