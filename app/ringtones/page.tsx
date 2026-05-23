@@ -219,26 +219,6 @@ export default function RingtonesPage() {
         </p>
       </div>
 
-      {/* Categories strip */}
-      {categories.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/ringtones/category/${cat.slug}`}
-              className="flex-shrink-0 flex items-center gap-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-600 text-gray-300 hover:text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-200"
-            >
-              {cat.preview_image && (
-                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
-                  <Image src={cat.preview_image} alt={cat.name} width={20} height={20} className="object-cover w-full h-full" />
-                </div>
-              )}
-              <span>{cat.name}</span>
-            </Link>
-          ))}
-        </div>
-      )}
-
       {/* Search + Sort */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
@@ -264,6 +244,29 @@ export default function RingtonesPage() {
           <option value="duration">Shortest First</option>
         </select>
       </div>
+
+      {/* Categories strip — below search */}
+      {categories.length > 0 && (
+        <div className="relative mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/ringtones/category/${cat.slug}`}
+                className="flex-shrink-0 flex items-center gap-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-600 text-gray-300 hover:text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-200"
+              >
+                {cat.preview_image && (
+                  <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
+                    <Image src={cat.preview_image} alt={cat.name} width={20} height={20} className="object-cover w-full h-full" />
+                  </div>
+                )}
+                <span>{cat.name}</span>
+              </Link>
+            ))}
+          </div>
+          <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-gray-950 to-transparent pointer-events-none" />
+        </div>
+      )}
 
       {/* Grid */}
       {loading ? (
