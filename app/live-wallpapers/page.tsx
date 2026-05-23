@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { LiveWallpaper } from '@/types'
+import LiveWallpaperExplore from '@/components/live-wallpapers/LiveWallpaperExplore'
 
 interface LiveCategory { id: number; name: string; slug: string }
 
@@ -132,6 +133,7 @@ export default function LiveWallpapersPage() {
   const pageRef = useRef(0)
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [exploreOpen, setExploreOpen] = useState(false)
 
   useEffect(() => {
     supabase
@@ -187,10 +189,26 @@ export default function LiveWallpapersPage() {
   }, [debouncedSearch]) // eslint-disable-line
 
   return (
+    <>
+    {exploreOpen && wallpapers.length > 0 && (
+      <LiveWallpaperExplore wallpapers={wallpapers} onClose={() => setExploreOpen(false)} />
+    )}
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-1">Free Live Wallpapers</h1>
-        <p className="text-gray-400 text-sm">Hover to preview · Click to download · Animated wallpapers for iPhone and Android</p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-1">Free Live Wallpapers</h1>
+          <p className="text-gray-400 text-sm">Hover to preview · Click to download · Animated wallpapers for iPhone and Android</p>
+        </div>
+        <button
+          onClick={() => setExploreOpen(true)}
+          disabled={loading || wallpapers.length === 0}
+          className="flex-shrink-0 flex items-center gap-2 bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+          </svg>
+          Explore
+        </button>
       </div>
 
       <div className="relative max-w-md mb-6">
@@ -255,5 +273,6 @@ export default function LiveWallpapersPage() {
         </>
       )}
     </div>
+    </>
   )
 }
