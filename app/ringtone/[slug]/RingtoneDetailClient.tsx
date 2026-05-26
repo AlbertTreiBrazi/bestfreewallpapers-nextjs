@@ -2,8 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDownload } from '@/hooks/useDownload'
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed'
 import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
@@ -24,6 +25,11 @@ function formatDuration(seconds: number): string {
 export default function RingtoneDetailClient({ ringtone, related }: Props) {
   const { isOpen, countdown, canDownload, isDownloading, item, userType, openDownload, closeDownload, startDownload } = useDownload()
   const [authOpen, setAuthOpen] = useState(false)
+  const { addItem } = useRecentlyViewed()
+
+  useEffect(() => {
+    addItem({ id: ringtone.id, type: 'ringtone', title: ringtone.title, slug: ringtone.slug, thumbnail_url: ringtone.cover_image_url })
+  }, [ringtone.id]) // eslint-disable-line
 
   const handleDownloadMP3 = () => {
     openDownload({

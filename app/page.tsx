@@ -6,6 +6,7 @@ import HomeHero from '@/components/home/HomeHero'
 import HomeRingtoneCard from '@/components/home/HomeRingtoneCard'
 import HomeLiveCard from '@/components/home/HomeLiveCard'
 import WallpaperCard from '@/components/wallpapers/WallpaperCard'
+import RecentlyViewedStrip from '@/components/home/RecentlyViewedStrip'
 
 export const metadata: Metadata = {
   title: 'Free HD Wallpapers Download — iPhone, Android, Live Wallpapers & Ringtones',
@@ -99,7 +100,10 @@ export default async function HomePage() {
 
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
 
-        {/* 2. TRENDING WALLPAPERS */}
+        {/* 2. RECENTLY VIEWED — client-side, localStorage */}
+        <RecentlyViewedStrip />
+
+        {/* 3. TRENDING WALLPAPERS */}
         <section id="wallpapers">
           <div className="flex items-center justify-between mb-6">
             <div>

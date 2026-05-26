@@ -2,9 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useDownload } from '@/hooks/useDownload'
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed'
 import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
@@ -21,6 +22,11 @@ export default function WallpaperDetailClient({ wallpaper, related }: Props) {
   const { isOpen, countdown, canDownload, isDownloading, item, userType, openDownload, closeDownload, startDownload } = useDownload()
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const { addItem } = useRecentlyViewed()
+
+  useEffect(() => {
+    addItem({ id: wallpaper.id, type: 'wallpaper', title: wallpaper.title, slug: wallpaper.slug, thumbnail_url: wallpaper.thumbnail_url })
+  }, [wallpaper.id]) // eslint-disable-line
 
   const handleDownload = () => {
     // Premium wallpaper + not logged in → show login modal

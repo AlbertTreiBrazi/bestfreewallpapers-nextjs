@@ -2,8 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useDownload } from '@/hooks/useDownload'
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed'
 import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
@@ -56,6 +57,11 @@ function RelatedLiveCard({ w }: { w: LiveWallpaper }) {
 export default function LiveWallpaperDetailClient({ lw, related }: Props) {
   const { isOpen, countdown, canDownload, isDownloading, item, userType, openDownload, closeDownload, startDownload } = useDownload()
   const [authOpen, setAuthOpen] = useState(false)
+  const { addItem } = useRecentlyViewed()
+
+  useEffect(() => {
+    addItem({ id: lw.id, type: 'live', title: lw.title, slug: lw.slug, thumbnail_url: lw.thumbnail_url })
+  }, [lw.id]) // eslint-disable-line
 
   const handleDownload = () => {
     openDownload({
