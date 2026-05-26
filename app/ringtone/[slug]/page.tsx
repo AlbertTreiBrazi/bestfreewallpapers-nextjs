@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
+import { breadcrumbSchema } from '@/lib/structured-data'
 import type { Ringtone } from '@/types'
 import RingtoneDetailClient from './RingtoneDetailClient'
 
@@ -43,16 +44,25 @@ export default async function RingtoneDetailPage({ params }: Props) {
 
   const structuredData = {
     '@context': 'https://schema.org',
-    '@type': 'MusicRecording',
-    name: ringtone.title,
-    description: ringtone.description || '',
-    url: `${SITE_URL}/ringtone/${slug}`,
-    duration: ringtone.duration_seconds ? `PT${ringtone.duration_seconds}S` : undefined,
-    image: ringtone.cover_image_url || undefined,
-    contentUrl: ringtone.audio_url,
-    encodingFormat: 'audio/mpeg',
-    license: `${SITE_URL}/license`,
-    creditText: 'BestFreeWallpapers.com',
+    '@graph': [
+      {
+        '@type': 'MusicRecording',
+        name: ringtone.title,
+        description: ringtone.description || '',
+        url: `${SITE_URL}/ringtone/${slug}`,
+        duration: ringtone.duration_seconds ? `PT${ringtone.duration_seconds}S` : undefined,
+        image: ringtone.cover_image_url || undefined,
+        contentUrl: ringtone.audio_url,
+        encodingFormat: 'audio/mpeg',
+        license: `${SITE_URL}/license`,
+        creditText: 'BestFreeWallpapers.com',
+      },
+      breadcrumbSchema([
+        { name: 'Home',      url: SITE_URL },
+        { name: 'Ringtones', url: `${SITE_URL}/ringtones` },
+        { name: ringtone.title },
+      ]),
+    ],
   }
 
   return (

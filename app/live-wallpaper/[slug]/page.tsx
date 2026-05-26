@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
+import { breadcrumbSchema } from '@/lib/structured-data'
 import type { LiveWallpaper } from '@/types'
 import LiveWallpaperDetailClient from './LiveWallpaperDetailClient'
 
@@ -43,16 +44,26 @@ export default async function LiveWallpaperDetailPage({ params }: Props) {
 
   const structuredData = {
     '@context': 'https://schema.org',
-    '@type': 'VideoObject',
-    name: lw.title,
-    description: lw.description || lw.title,
-    thumbnailUrl: lw.thumbnail_url || undefined,
-    contentUrl: lw.video_url,
-    embedUrl: `${SITE_URL}/live-wallpaper/${slug}`,
-    uploadDate: lw.created_at,
-    duration: lw.duration_seconds ? `PT${lw.duration_seconds}S` : undefined,
-    url: `${SITE_URL}/live-wallpaper/${slug}`,
-    license: `${SITE_URL}/license`,
+    '@graph': [
+      {
+        '@type': 'VideoObject',
+        name: lw.title,
+        description: lw.description || lw.title,
+        thumbnailUrl: lw.thumbnail_url || undefined,
+        contentUrl: lw.video_url,
+        embedUrl: `${SITE_URL}/live-wallpaper/${slug}`,
+        uploadDate: lw.created_at,
+        duration: lw.duration_seconds ? `PT${lw.duration_seconds}S` : undefined,
+        url: `${SITE_URL}/live-wallpaper/${slug}`,
+        license: `${SITE_URL}/license`,
+      },
+      breadcrumbSchema([
+        { name: 'Home',            url: SITE_URL },
+        { name: 'Live Wallpapers', url: `${SITE_URL}/live-wallpapers` },
+        ...(lw.category ? [{ name: lw.category, url: `${SITE_URL}/live-wallpapers/category/${lw.category.toLowerCase().replace(/\s+/g, '-')}` }] : []),
+        { name: lw.title },
+      ]),
+    ],
   }
 
   return (

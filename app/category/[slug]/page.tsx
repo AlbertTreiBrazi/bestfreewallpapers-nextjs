@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
+import { breadcrumbSchema, itemListSchema } from '@/lib/structured-data'
 import type { Category, Wallpaper } from '@/types'
 
 interface Props {
@@ -61,12 +62,29 @@ export default async function CategoryPage({ params }: Props) {
 
   const wallpapers = (data || []) as Wallpaper[]
 
+  const pageUrl = `${SITE_URL}/category/${slug}`
+
   const structuredData = {
     '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: `${cat.name} Wallpapers`,
-    description: cat.description || '',
-    url: `${SITE_URL}/category/${slug}`,
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        name: `${cat.name} Wallpapers`,
+        description: cat.description || `Free ${cat.name} wallpapers for iPhone and Android.`,
+        url: pageUrl,
+        image: cat.preview_image || undefined,
+      },
+      breadcrumbSchema([
+        { name: 'Home',       url: SITE_URL },
+        { name: 'Categories', url: `${SITE_URL}/categories` },
+        { name: `${cat.name} Wallpapers` },
+      ]),
+      itemListSchema(
+        `${cat.name} Wallpapers`,
+        pageUrl,
+        wallpapers.map((w) => ({ name: w.title, slug: w.slug, contentType: 'wallpaper' as const })),
+      ),
+    ],
   }
 
   return (

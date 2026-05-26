@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
+import { breadcrumbSchema } from '@/lib/structured-data'
 import type { Wallpaper } from '@/types'
 import WallpaperDetailClient from './WallpaperDetailClient'
 
@@ -136,20 +137,33 @@ export default async function WallpaperDetailPage({ params }: Props) {
     getCategoryInfo(wallpaper.category_id),
   ])
 
+  // Build breadcrumb items: Home > Wallpapers > [Category?] > Title
+  const breadcrumbItems = [
+    { name: 'Home',       url: SITE_URL },
+    { name: 'Wallpapers', url: `${SITE_URL}/wallpapers` },
+    ...(categoryInfo ? [{ name: categoryInfo.name, url: `${SITE_URL}/category/${categoryInfo.slug}` }] : []),
+    { name: wallpaper.title }, // no url = current page
+  ]
+
   const structuredData = {
     '@context': 'https://schema.org',
-    '@type': 'ImageObject',
-    name: wallpaper.title,
-    description: wallpaper.description || '',
-    contentUrl: wallpaper.image_url,
-    thumbnailUrl: wallpaper.thumbnail_url || wallpaper.image_url,
-    url: `${SITE_URL}/wallpaper/${slug}`,
-    width: wallpaper.width,
-    height: wallpaper.height,
-    encodingFormat: 'image/jpeg',
-    license: `${SITE_URL}/license`,
-    creditText: 'BestFreeWallpapers.com',
-    copyrightNotice: '© BestFreeWallpapers.com — Free for personal use',
+    '@graph': [
+      {
+        '@type': 'ImageObject',
+        name: wallpaper.title,
+        description: wallpaper.description || '',
+        contentUrl: wallpaper.image_url,
+        thumbnailUrl: wallpaper.thumbnail_url || wallpaper.image_url,
+        url: `${SITE_URL}/wallpaper/${slug}`,
+        width: wallpaper.width,
+        height: wallpaper.height,
+        encodingFormat: 'image/jpeg',
+        license: `${SITE_URL}/license`,
+        creditText: 'BestFreeWallpapers.com',
+        copyrightNotice: '© BestFreeWallpapers.com — Free for personal use',
+      },
+      breadcrumbSchema(breadcrumbItems),
+    ],
   }
 
   return (
