@@ -15,7 +15,8 @@ interface CardProps {
 }
 
 function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) {
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)         // mobile video
+  const videoRefDesktop = useRef<HTMLVideoElement>(null)  // desktop phone-container video
   const cardRef = useRef<HTMLDivElement>(null)
   const { isFavorite, toggleFavorite } = useFavorites()
   const faved = isFavorite(lw.id, 'live')
@@ -33,32 +34,27 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
     return () => observer.disconnect()
   }, [index, onBecomeActive])
 
-  // Auto-play when card is active, pause+reset when leaving
+  // Auto-play when card is active, pause+reset when leaving — controls both mobile & desktop video
   useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
+    const videos = [videoRef.current, videoRefDesktop.current].filter(Boolean) as HTMLVideoElement[]
     if (isActive && !paused) {
-      video.play().catch(() => {})
+      videos.forEach(v => v.play().catch(() => {}))
     } else {
-      video.pause()
-      if (!isActive) {
-        video.currentTime = 0
-        setPaused(false)
-        setVideoReady(false)
-      }
+      videos.forEach(v => { v.pause(); if (!isActive) v.currentTime = 0 })
+      if (!isActive) { setPaused(false); setVideoReady(false) }
     }
   }, [isActive, paused])
 
   const handleTap = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
     if (target.closest('button') || target.closest('a')) return
-    const video = videoRef.current
+    const video = videoRef.current || videoRefDesktop.current
     if (!video) return
     if (paused) {
-      video.play().catch(() => {})
+      ;[videoRef.current, videoRefDesktop.current].filter(Boolean).forEach(v => v!.play().catch(() => {}))
       setPaused(false)
     } else {
-      video.pause()
+      ;[videoRef.current, videoRefDesktop.current].filter(Boolean).forEach(v => v!.pause())
       setPaused(true)
     }
   }
@@ -69,28 +65,40 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
     toggleFavorite(lw.id, 'live')
   }
 
+  const thumbSrc = lw.thumbnail_url
+
   return (
     <div
       ref={cardRef}
       className="snap-start shrink-0 w-full h-[100dvh] relative overflow-hidden bg-black"
       onClick={handleTap}
     >
-      {/* Thumbnail — always shown until video is ready */}
-      {lw.thumbnail_url && (
-        <Image
-          src={lw.thumbnail_url}
-          alt={lw.title}
-          fill
-          priority={index === 0}
-          className={`object-cover transition-opacity duration-300 ${videoReady ? 'opacity-0' : 'opacity-100'}`}
-        />
+      {/* ── Desktop: blurred backdrop so letterboxing looks nice ── */}
+      {thumbSrc && (
+        <div className="hidden md:block absolute inset-0 pointer-events-none">
+          <Image src={thumbSrc} alt="" fill sizes="100vw" className="object-cover scale-110 blur-3xl opacity-30" />
+          <div className="absolute inset-0 bg-black/55" />
+        </div>
       )}
 
-      {/* Video — always in DOM with preload=none, plays on demand */}
+      {/* ── Mobile: full-bleed thumbnail (fades out when video is ready) ── */}
+      {thumbSrc && (
+        <div className="md:hidden absolute inset-0">
+          <Image
+            src={thumbSrc}
+            alt={lw.title}
+            fill
+            priority={index === 0}
+            className={`object-cover transition-opacity duration-300 ${videoReady ? 'opacity-0' : 'opacity-100'}`}
+          />
+        </div>
+      )}
+
+      {/* ── Mobile: full-bleed video ── */}
       <video
         ref={videoRef}
         src={lw.video_url ?? undefined}
-        className="absolute inset-0 w-full h-full object-cover"
+        className="md:hidden absolute inset-0 w-full h-full object-cover"
         loop
         muted
         playsInline
@@ -98,9 +106,54 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
         onCanPlay={() => setVideoReady(true)}
       />
 
-      {/* Paused overlay */}
+      {/* ── Desktop: centered phone-width container (9:16, max 440px) ── */}
+      <div className="hidden md:flex absolute inset-0 items-center justify-center">
+        <div
+          className="relative h-full overflow-hidden rounded-2xl shadow-2xl"
+          style={{ aspectRatio: '9/16', maxHeight: '100%', maxWidth: '440px' }}
+        >
+          {/* Thumbnail fades out once desktop video is ready */}
+          {thumbSrc && (
+            <Image
+              src={thumbSrc}
+              alt={lw.title}
+              fill
+              sizes="440px"
+              priority={index < 2}
+              className={`object-cover transition-opacity duration-300 ${videoReady ? 'opacity-0' : 'opacity-100'}`}
+            />
+          )}
+          {/* Desktop video fills phone container */}
+          <video
+            ref={videoRefDesktop}
+            src={lw.video_url ?? undefined}
+            className="absolute inset-0 w-full h-full object-cover"
+            loop
+            muted
+            playsInline
+            preload="none"
+          />
+          {/* Vignette inside phone container */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent via-40% to-black/70 pointer-events-none" />
+          {/* Paused overlay inside phone container on desktop */}
+          {paused && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-16 h-16 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Dark vignette — mobile only (desktop vignette is inside phone container) */}
+      <div className="md:hidden absolute inset-0 bg-gradient-to-b from-black/30 via-transparent via-40% to-black/70 pointer-events-none" />
+
+      {/* Paused overlay — mobile only */}
       {paused && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="md:hidden absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-16 h-16 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
             <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
@@ -109,7 +162,7 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
         </div>
       )}
 
-      {/* Position indicator — top right (close button is top left, rendered by parent) */}
+      {/* Position indicator — top right */}
       <div className="absolute top-4 right-4 z-10 pointer-events-none">
         <span className="text-white/70 text-xs bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-full">
           {index + 1} / {total}
@@ -144,7 +197,7 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
       </div>
 
       {/* Bottom info overlay */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none z-10">
+      <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none z-10 md:hidden">
         <h2 className="text-white font-bold text-base line-clamp-2 leading-snug pr-16 drop-shadow">
           {lw.title}
         </h2>
@@ -159,6 +212,16 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
         {index === 0 && (
           <p className="text-white/30 text-xs mt-2 animate-pulse">Swipe up for next ↑  ·  Tap to pause</p>
         )}
+      </div>
+
+      {/* Bottom info overlay — desktop (below phone container, above blurred bg) */}
+      <div className="hidden md:flex absolute bottom-6 left-0 right-0 justify-center z-10 pointer-events-none">
+        <div style={{ maxWidth: '440px', width: '100%' }} className="px-3">
+          <h2 className="text-white font-bold text-base line-clamp-1 drop-shadow-lg">{lw.title}</h2>
+          {lw.tags && lw.tags.length > 0 && (
+            <p className="text-white/50 text-xs mt-0.5">{lw.tags.slice(0, 3).map(t => `#${t}`).join('  ')}</p>
+          )}
+        </div>
       </div>
     </div>
   )

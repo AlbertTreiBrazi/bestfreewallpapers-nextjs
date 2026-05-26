@@ -57,19 +57,32 @@ function ExploreCard({ wallpaper, index, total, isActive, onBecomeActive }: Card
       ref={cardRef}
       className="snap-start shrink-0 w-full h-[100dvh] relative overflow-hidden bg-black"
     >
-      {/* Wallpaper image */}
-      <Image
-        src={imgSrc}
-        alt={wallpaper.title}
-        fill
-        priority={index < 2}
-        sizes="100vw"
-        className="object-cover"
-        draggable={false}
-      />
+      {/* ── Desktop: blurred backdrop so black bars look nice ── */}
+      <div className="hidden md:block absolute inset-0 pointer-events-none">
+        <Image src={imgSrc} alt="" fill sizes="100vw" className="object-cover scale-110 blur-3xl opacity-30" />
+        <div className="absolute inset-0 bg-black/55" />
+      </div>
+
+      {/* ── Mobile: full-bleed image ── */}
+      <div className="md:hidden absolute inset-0">
+        <Image src={imgSrc} alt={wallpaper.title} fill priority={index < 2} sizes="100vw" className="object-cover" draggable={false} />
+      </div>
+
+      {/* ── Desktop: centered phone-width container ── */}
+      <div className="hidden md:flex absolute inset-0 items-center justify-center">
+        <div className="relative h-full" style={{ aspectRatio: '9/16', maxHeight: '100%', maxWidth: '440px' }}>
+          <Image src={imgSrc} alt={wallpaper.title} fill priority={index < 2} sizes="440px" className="object-cover rounded-2xl shadow-2xl" draggable={false} />
+        </div>
+      </div>
 
       {/* Dark vignette at top and bottom for readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent via-40% to-black/70 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent via-40% to-black/70 pointer-events-none md:hidden" />
+      {/* Desktop vignette only inside the phone container area */}
+      <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
+        <div className="relative h-full" style={{ aspectRatio: '9/16', maxHeight: '100%', maxWidth: '440px' }}>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent via-40% to-black/70 rounded-2xl" />
+        </div>
+      </div>
 
       {/* Position indicator — top right */}
       <div className="absolute top-4 right-4 z-10 pointer-events-none">
