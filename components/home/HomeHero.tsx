@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 const POPULAR_CATEGORIES = [
   { name: 'Aesthetic', slug: 'aesthetic' },
@@ -15,14 +16,55 @@ const POPULAR_CATEGORIES = [
   { name: 'Minimal', slug: 'minimal' },
 ]
 
+type SurpriseType = 'wallpaper' | 'live' | 'ringtone'
+
+async function fetchRandomSlug(type: SurpriseType): Promise<string | null> {
+  if (type === 'wallpaper') {
+    const { data } = await supabase.from('wallpapers')
+      .select('slug').eq('is_active', true).limit(200)
+    if (!data?.length) return null
+    return data[Math.floor(Math.random() * data.length)].slug
+  }
+  if (type === 'live') {
+    const { data } = await supabase.from('live_wallpapers')
+      .select('slug').eq('is_active', true).eq('is_published', true).limit(200)
+    if (!data?.length) return null
+    return data[Math.floor(Math.random() * data.length)].slug
+  }
+  // ringtone
+  const { data } = await supabase.from('ringtones')
+    .select('slug').eq('is_active', true).eq('is_published', true).limit(200)
+  if (!data?.length) return null
+  return data[Math.floor(Math.random() * data.length)].slug
+}
+
+const SURPRISE_TYPES: SurpriseType[] = ['wallpaper', 'wallpaper', 'wallpaper', 'live', 'ringtone'] // wallpaper 3x mai probabil
+
 export default function HomeHero({ stats }: { stats: { wallpapers: number; ringtones: number; live: number } }) {
   const [query, setQuery] = useState('')
+  const [surprising, setSurprising] = useState(false)
   const router = useRouter()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (query.trim()) {
       router.push(`/search?q=${encodeURIComponent(query.trim())}`)
+    }
+  }
+
+  const handleSurprise = async () => {
+    if (surprising) return
+    setSurprising(true)
+    try {
+      const type = SURPRISE_TYPES[Math.floor(Math.random() * SURPRISE_TYPES.length)]
+      const slug = await fetchRandomSlug(type)
+      if (!slug) return
+      const path = type === 'wallpaper' ? `/wallpaper/${slug}`
+        : type === 'live' ? `/live-wallpaper/${slug}`
+        : `/ringtone/${slug}`
+      router.push(path)
+    } finally {
+      setSurprising(false)
     }
   }
 
@@ -55,7 +97,7 @@ export default function HomeHero({ stats }: { stats: { wallpapers: number; ringt
           </p>
 
           {/* Search bar */}
-          <form onSubmit={handleSearch} className="mb-8">
+          <form onSubmit={handleSearch} className="mb-4">
             <div className="relative">
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -75,6 +117,27 @@ export default function HomeHero({ stats }: { stats: { wallpapers: number; ringt
               </button>
             </div>
           </form>
+
+          {/* Surprise me */}
+          <div className="flex justify-center mb-8">
+            <button
+              onClick={handleSurprise}
+              disabled={surprising}
+              className="group flex items-center gap-2 bg-gray-800/60 hover:bg-gray-700/80 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all disabled:opacity-60"
+            >
+              {surprising ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                  Finding something...
+                </>
+              ) : (
+                <>
+                  <span className="text-lg group-hover:animate-spin" style={{ display: 'inline-block' }}>🎲</span>
+                  Surprise me
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Category tags */}
