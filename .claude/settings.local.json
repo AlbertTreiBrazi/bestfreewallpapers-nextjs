@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(git push *)",
-      "Read(//f/BestfreeWallpapers nextjs/csv_extract/**)",
-      "Read(//f/BestfreeWallpapers nextjs/**)"
-    ]
-  }
-}
