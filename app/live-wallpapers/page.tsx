@@ -117,10 +117,20 @@ function LiveWallpaperCard({ lw }: { lw: LiveWallpaper }) {
       )}
 
       <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-        <p className="text-white text-xs font-medium line-clamp-2">{lw.title}</p>
-        {lw.duration_seconds && (
-          <p className="text-gray-300 text-xs mt-0.5">{lw.duration_seconds}s</p>
-        )}
+        <p className="text-white text-xs font-medium line-clamp-1">{lw.title}</p>
+        <div className="flex items-center gap-2 mt-0.5">
+          {lw.downloads_count > 0 && (
+            <span className="text-gray-300 text-xs flex items-center gap-0.5">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              {lw.downloads_count >= 1000 ? `${(lw.downloads_count / 1000).toFixed(1)}k` : lw.downloads_count}
+            </span>
+          )}
+          {lw.duration_seconds && (
+            <span className="text-gray-400 text-xs">{lw.duration_seconds}s</span>
+          )}
+        </div>
       </div>
     </Link>
   )

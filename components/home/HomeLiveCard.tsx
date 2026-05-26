@@ -13,6 +13,7 @@ interface Props {
     thumbnail_url: string | null
     video_url: string
     duration_seconds?: number | null
+    downloads_count?: number
     is_premium: boolean
     created_at?: string
   }
@@ -125,7 +126,15 @@ export default function HomeLiveCard({ lw }: Props) {
       )}
 
       <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-        <p className="text-white text-xs font-medium line-clamp-2">{lw.title}</p>
+        <p className="text-white text-xs font-medium line-clamp-1">{lw.title}</p>
+        {lw.downloads_count !== undefined && lw.downloads_count > 0 && (
+          <p className="text-gray-300 text-xs mt-0.5 flex items-center gap-0.5">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            {lw.downloads_count >= 1000 ? `${(lw.downloads_count / 1000).toFixed(1)}k` : lw.downloads_count.toLocaleString()}
+          </p>
+        )}
       </div>
     </Link>
   )
