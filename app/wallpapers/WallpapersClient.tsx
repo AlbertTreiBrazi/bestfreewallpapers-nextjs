@@ -16,7 +16,7 @@ interface Wallpaper {
   id: number; title: string; slug: string
   thumbnail_url: string | null; image_url: string; is_premium: boolean
   download_count: number; created_at: string; tags?: string[] | null
-  category?: string | null
+  category_id?: number | null
 }
 
 const LIMIT = 48
@@ -74,7 +74,7 @@ export default function WallpapersClient() {
 
     let query = supabase
       .from('wallpapers')
-      .select('id, title, slug, thumbnail_url, image_url, is_premium, download_count, created_at, tags, category')
+      .select('id, title, slug, thumbnail_url, image_url, is_premium, download_count, created_at, tags, category_id')
       .eq('is_active', true)
       .range(from, to)
 
@@ -93,7 +93,13 @@ export default function WallpapersClient() {
     else if (sort === 'newest') query = query.order('created_at', { ascending: false })
     else query = query.order('created_at', { ascending: true })
 
-    const { data } = await query
+    const { data, error } = await query
+    if (error) {
+      console.error('[WallpapersClient] Supabase error:', error.message, error.details)
+      setLoading(false)
+      setLoadingMore(false)
+      return
+    }
     const items = (data || []) as Wallpaper[]
 
     if (isReset) {
