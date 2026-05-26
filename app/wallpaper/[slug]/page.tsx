@@ -10,6 +10,13 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
+export interface CollectionInfo {
+  id: string
+  name: string
+  slug: string
+  cover_image_url: string | null
+}
+
 async function getWallpaper(slug: string): Promise<Wallpaper | null> {
   const supabase = createServerSupabaseClient()
   const { data } = await supabase
@@ -34,6 +41,17 @@ async function getRelated(categoryId: number | null, currentId: number): Promise
   return (data || []) as Wallpaper[]
 }
 
+async function getWallpaperCollections(wallpaperId: number): Promise<CollectionInfo[]> {
+  const supabase = createServerSupabaseClient()
+  const { data } = await supabase
+    .from('collection_wallpapers')
+    .select('collection:collections(id, name, slug, cover_image_url)')
+    .eq('wallpaper_id', wallpaperId)
+    .limit(3)
+  if (!data?.length) return []
+  return data.map((r: any) => r.collection).filter(Boolean) as CollectionInfo[]
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const w = await getWallpaper(slug)
@@ -56,7 +74,10 @@ export default async function WallpaperDetailPage({ params }: Props) {
   const { slug } = await params
   const wallpaper = await getWallpaper(slug)
   if (!wallpaper) notFound()
-  const related = await getRelated(wallpaper.category_id, wallpaper.id)
+  const [related, collections] = await Promise.all([
+    getRelated(wallpaper.category_id, wallpaper.id),
+    getWallpaperCollections(wallpaper.id),
+  ])
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -77,7 +98,7 @@ export default async function WallpaperDetailPage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-      <WallpaperDetailClient wallpaper={wallpaper} related={related} />
+      <WallpaperDetailClient wallpaper={wallpaper} related={related} collections={collections} />
     </>
   )
 }

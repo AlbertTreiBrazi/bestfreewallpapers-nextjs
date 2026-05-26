@@ -11,13 +11,15 @@ import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
 import ShareButton from '@/components/ui/ShareButton'
 import type { Wallpaper } from '@/types'
+import type { CollectionInfo } from './page'
 
 interface Props {
   wallpaper: Wallpaper
   related: Wallpaper[]
+  collections?: CollectionInfo[]
 }
 
-export default function WallpaperDetailClient({ wallpaper, related }: Props) {
+export default function WallpaperDetailClient({ wallpaper, related, collections = [] }: Props) {
   const { user } = useAuth()
   const { isOpen, countdown, canDownload, isDownloading, item, userType, openDownload, closeDownload, startDownload } = useDownload()
   const [authOpen, setAuthOpen] = useState(false)
@@ -126,12 +128,42 @@ export default function WallpaperDetailClient({ wallpaper, related }: Props) {
 
               {/* Tags */}
               {wallpaper.tags && wallpaper.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="flex flex-wrap gap-2 mb-4">
                   {wallpaper.tags.slice(0, 8).map((tag) => (
                     <Link key={tag} href={`/tag/${encodeURIComponent(tag)}`} className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs px-3 py-1 rounded-full border border-gray-700 hover:border-gray-600 transition-colors">
                       #{tag}
                     </Link>
                   ))}
+                </div>
+              )}
+
+              {/* Collections */}
+              {collections.length > 0 && (
+                <div className="mb-6">
+                  <p className="text-gray-500 text-xs mb-2">Part of collection</p>
+                  <div className="flex flex-wrap gap-2">
+                    {collections.map((col) => (
+                      <Link
+                        key={col.id}
+                        href={`/collections/${col.slug}`}
+                        className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-700 text-gray-300 hover:text-white text-sm px-3 py-2 rounded-xl transition-all group"
+                      >
+                        {col.cover_image_url ? (
+                          <div className="relative w-6 h-6 rounded overflow-hidden flex-shrink-0">
+                            <Image src={col.cover_image_url} alt={col.name} fill sizes="24px" className="object-cover" />
+                          </div>
+                        ) : (
+                          <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                          </svg>
+                        )}
+                        <span className="font-medium">{col.name}</span>
+                        <svg className="w-3.5 h-3.5 text-gray-500 group-hover:text-green-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
