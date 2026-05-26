@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import WallpaperCard from '@/components/wallpapers/WallpaperCard'
 import WallpaperExplore from '@/components/wallpapers/WallpaperExplore'
 import type { Wallpaper as WallpaperFull } from '@/types'
+import { COLOR_OPTIONS, type ColorBucket } from '@/lib/color-utils'
 
 type SortOption = 'popular' | 'newest' | 'oldest'
 type FilterOption = 'all' | 'free' | 'premium'
@@ -40,6 +41,7 @@ export default function WallpapersClient() {
   const [sort, setSort] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'popular')
   const [filter, setFilter] = useState<FilterOption>((searchParams.get('filter') as FilterOption) || 'all')
   const [device, setDevice] = useState<DeviceOption>((searchParams.get('device') as DeviceOption) || 'all')
+  const [color, setColor] = useState<ColorBucket | 'all'>((searchParams.get('color') as ColorBucket) || 'all')
   const [search, setSearch] = useState(searchParams.get('q') || '')
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('q') || '')
   const [exploreOpen, setExploreOpen] = useState(false)
@@ -56,10 +58,11 @@ export default function WallpapersClient() {
     if (sort !== 'popular') params.set('sort', sort)
     if (filter !== 'all') params.set('filter', filter)
     if (device !== 'all') params.set('device', device)
+    if (color !== 'all') params.set('color', color)
     if (debouncedSearch) params.set('q', debouncedSearch)
     const qs = params.toString()
     router.replace(qs ? `/wallpapers?${qs}` : '/wallpapers', { scroll: false })
-  }, [sort, filter, device, debouncedSearch]) // eslint-disable-line
+  }, [sort, filter, device, color, debouncedSearch]) // eslint-disable-line
 
   const fetchWallpapers = useCallback(async (reset = true) => {
     const isReset = reset
@@ -83,6 +86,9 @@ export default function WallpapersClient() {
     const dbDevice = DEVICES.find(d => d.value === device)?.dbValue
     if (dbDevice) query = query.eq('device_type', dbDevice)
 
+    // Color filter
+    if (color !== 'all') query = query.eq('dominant_color', color)
+
     if (sort === 'popular') query = query.order('download_count', { ascending: false })
     else if (sort === 'newest') query = query.order('created_at', { ascending: false })
     else query = query.order('created_at', { ascending: true })
@@ -101,15 +107,16 @@ export default function WallpapersClient() {
     setHasMore(items.length === LIMIT)
     setLoading(false)
     setLoadingMore(false)
-  }, [sort, filter, device, debouncedSearch, page])
+  }, [sort, filter, device, color, debouncedSearch, page])
 
   // Reset and fetch when filters change
   useEffect(() => {
     fetchWallpapers(true)
-  }, [sort, filter, device, debouncedSearch]) // eslint-disable-line
+  }, [sort, filter, device, color, debouncedSearch]) // eslint-disable-line
 
   const activeDevice = DEVICES.find(d => d.value === device)!
-  const hasActiveFilters = device !== 'all' || filter !== 'all' || debouncedSearch
+  const activeColor = COLOR_OPTIONS.find(c => c.value === color)
+  const hasActiveFilters = device !== 'all' || filter !== 'all' || color !== 'all' || debouncedSearch
 
   return (
     <>
@@ -166,6 +173,42 @@ export default function WallpapersClient() {
         ))}
       </div>
 
+      {/* Color swatches */}
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-gray-500 text-xs whitespace-nowrap">Color:</span>
+        {/* "All" swatch */}
+        <button
+          onClick={() => setColor('all')}
+          title="All colors"
+          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+            color === 'all'
+              ? 'border-white scale-110'
+              : 'border-gray-600 hover:border-gray-400'
+          } bg-gradient-to-br from-red-400 via-blue-400 to-green-400`}
+        >
+          {color === 'all' && (
+            <svg className="w-3 h-3 text-white drop-shadow" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+        </button>
+        {COLOR_OPTIONS.map((c) => (
+          <button
+            key={c.value}
+            onClick={() => setColor(color === c.value ? 'all' : c.value)}
+            title={c.label}
+            className={`w-7 h-7 rounded-full border-2 transition-all flex-shrink-0 ${c.bg} ${
+              color === c.value
+                ? 'border-white scale-125 shadow-lg'
+                : 'border-transparent hover:border-white/50 hover:scale-110'
+            }`}
+          />
+        ))}
+        {color !== 'all' && activeColor && (
+          <span className="text-gray-400 text-xs ml-1">{activeColor.label}</span>
+        )}
+      </div>
+
       {/* Search + Filters bar */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         {/* Search */}
@@ -216,6 +259,12 @@ export default function WallpapersClient() {
               {activeDevice.icon} {activeDevice.label}
             </span>
           )}
+          {color !== 'all' && activeColor && (
+            <span className="flex items-center gap-1 bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full">
+              <span className={`w-2.5 h-2.5 rounded-full ${activeColor.bg}`} />
+              {activeColor.label}
+            </span>
+          )}
           {filter !== 'all' && (
             <span className="bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full capitalize">
               {filter}
@@ -227,7 +276,7 @@ export default function WallpapersClient() {
             </span>
           )}
           <button
-            onClick={() => { setDevice('all'); setFilter('all'); setSearch('') }}
+            onClick={() => { setDevice('all'); setFilter('all'); setColor('all'); setSearch('') }}
             className="text-red-400 hover:text-red-300 ml-1 underline"
           >
             Clear all
