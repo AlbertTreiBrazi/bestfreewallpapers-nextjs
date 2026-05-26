@@ -10,16 +10,18 @@ import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
 import ShareButton from '@/components/ui/ShareButton'
+import WallpaperCard from '@/components/wallpapers/WallpaperCard'
 import type { Wallpaper } from '@/types'
-import type { CollectionInfo } from './page'
+import type { CollectionInfo, CategoryInfo } from './page'
 
 interface Props {
   wallpaper: Wallpaper
   related: Wallpaper[]
   collections?: CollectionInfo[]
+  categoryInfo?: CategoryInfo | null
 }
 
-export default function WallpaperDetailClient({ wallpaper, related, collections = [] }: Props) {
+export default function WallpaperDetailClient({ wallpaper, related, collections = [], categoryInfo }: Props) {
   const { user } = useAuth()
   const { isOpen, countdown, canDownload, isDownloading, item, userType, openDownload, closeDownload, startDownload } = useDownload()
   const [authOpen, setAuthOpen] = useState(false)
@@ -208,19 +210,39 @@ export default function WallpaperDetailClient({ wallpaper, related, collections 
           </div>
         </div>
 
-        {/* Related */}
+        {/* Similar Wallpapers */}
         {related.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-xl font-semibold text-white mb-6">Related Wallpapers</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-              {related.map((w) => (
-                <Link key={w.id} href={`/wallpaper/${w.slug}`} className="group relative aspect-[9/16] rounded-lg overflow-hidden bg-gray-800 block">
-                  {w.thumbnail_url && (
-                    <Image src={w.thumbnail_url} alt={w.title} fill sizes="16vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <p className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity">{w.title}</p>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-white">
+                  {categoryInfo ? `More ${categoryInfo.name} Wallpapers` : 'Similar Wallpapers'}
+                </h2>
+                <p className="text-gray-500 text-sm mt-0.5">
+                  {categoryInfo ? `${related.length} more in this category` : `${related.length} wallpapers you might like`}
+                </p>
+              </div>
+              {categoryInfo && (
+                <Link
+                  href={`/category/${categoryInfo.slug}`}
+                  className="text-green-400 hover:text-green-300 text-sm font-medium whitespace-nowrap transition-colors"
+                >
+                  See all →
                 </Link>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {related.map((w) => (
+                <WallpaperCard
+                  key={w.id}
+                  id={w.id}
+                  title={w.title}
+                  slug={w.slug}
+                  thumbnail_url={w.thumbnail_url}
+                  is_premium={w.is_premium}
+                  download_count={(w as any).download_count ?? 0}
+                  created_at={(w as any).created_at ?? ''}
+                />
               ))}
             </div>
           </section>

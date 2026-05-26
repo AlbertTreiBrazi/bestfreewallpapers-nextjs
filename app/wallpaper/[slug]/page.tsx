@@ -17,6 +17,11 @@ export interface CollectionInfo {
   cover_image_url: string | null
 }
 
+export interface CategoryInfo {
+  name: string
+  slug: string
+}
+
 async function getWallpaper(slug: string): Promise<Wallpaper | null> {
   const supabase = createServerSupabaseClient()
   const { data } = await supabase
@@ -28,17 +33,68 @@ async function getWallpaper(slug: string): Promise<Wallpaper | null> {
   return data as Wallpaper | null
 }
 
-async function getRelated(categoryId: number | null, currentId: number): Promise<Wallpaper[]> {
+const RELATED_SELECT = 'id, title, slug, thumbnail_url, is_premium, download_count, created_at'
+
+async function getRelated(
+  categoryId: number | null,
+  currentId: number,
+  tags: string[] | null,
+): Promise<Wallpaper[]> {
   const supabase = createServerSupabaseClient()
-  let query = supabase
-    .from('wallpapers')
-    .select('id, title, slug, thumbnail_url, is_premium')
-    .eq('is_active', true)
-    .neq('id', currentId)
-    .limit(6)
-  if (categoryId) query = query.eq('category_id', categoryId)
-  const { data } = await query
-  return (data || []) as Wallpaper[]
+
+  // Primary: same category, sorted by popularity
+  let primary: Wallpaper[] = []
+  if (categoryId) {
+    const { data } = await supabase
+      .from('wallpapers')
+      .select(RELATED_SELECT)
+      .eq('is_active', true)
+      .neq('id', currentId)
+      .eq('category_id', categoryId)
+      .order('download_count', { ascending: false })
+      .limit(12)
+    primary = (data || []) as Wallpaper[]
+  }
+
+  // Secondary: fill remaining slots with tag-based matches
+  if (primary.length < 8 && tags && tags.length > 0) {
+    const primaryTag = tags[0]
+    const excludeIds = [currentId, ...primary.map((w) => w.id)]
+    const { data } = await supabase
+      .from('wallpapers')
+      .select(RELATED_SELECT)
+      .eq('is_active', true)
+      .contains('tags', [primaryTag])
+      .not('id', 'in', `(${excludeIds.join(',')})`)
+      .order('download_count', { ascending: false })
+      .limit(12 - primary.length)
+    primary = [...primary, ...(data || []) as Wallpaper[]]
+  }
+
+  // Fallback: if still empty (no category, no tags) — show popular wallpapers
+  if (primary.length === 0) {
+    const { data } = await supabase
+      .from('wallpapers')
+      .select(RELATED_SELECT)
+      .eq('is_active', true)
+      .neq('id', currentId)
+      .order('download_count', { ascending: false })
+      .limit(12)
+    primary = (data || []) as Wallpaper[]
+  }
+
+  return primary
+}
+
+async function getCategoryInfo(categoryId: number | null): Promise<CategoryInfo | null> {
+  if (!categoryId) return null
+  const supabase = createServerSupabaseClient()
+  const { data } = await supabase
+    .from('categories')
+    .select('name, slug')
+    .eq('id', categoryId)
+    .single()
+  return data as CategoryInfo | null
 }
 
 async function getWallpaperCollections(wallpaperId: number): Promise<CollectionInfo[]> {
@@ -74,9 +130,10 @@ export default async function WallpaperDetailPage({ params }: Props) {
   const { slug } = await params
   const wallpaper = await getWallpaper(slug)
   if (!wallpaper) notFound()
-  const [related, collections] = await Promise.all([
-    getRelated(wallpaper.category_id, wallpaper.id),
+  const [related, collections, categoryInfo] = await Promise.all([
+    getRelated(wallpaper.category_id, wallpaper.id, wallpaper.tags),
     getWallpaperCollections(wallpaper.id),
+    getCategoryInfo(wallpaper.category_id),
   ])
 
   const structuredData = {
@@ -98,7 +155,7 @@ export default async function WallpaperDetailPage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-      <WallpaperDetailClient wallpaper={wallpaper} related={related} collections={collections} />
+      <WallpaperDetailClient wallpaper={wallpaper} related={related} collections={collections} categoryInfo={categoryInfo} />
     </>
   )
 }
