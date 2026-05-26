@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import WallpaperCard from '@/components/wallpapers/WallpaperCard'
+import WallpaperExplore from '@/components/wallpapers/WallpaperExplore'
+import type { Wallpaper as WallpaperFull } from '@/types'
 
 type SortOption = 'popular' | 'newest' | 'oldest'
 type FilterOption = 'all' | 'free' | 'premium'
@@ -11,8 +13,9 @@ type DeviceOption = 'all' | 'iphone' | 'android' | 'ipad' | 'desktop'
 
 interface Wallpaper {
   id: number; title: string; slug: string
-  thumbnail_url: string | null; is_premium: boolean
-  download_count: number; created_at: string
+  thumbnail_url: string | null; image_url: string; is_premium: boolean
+  download_count: number; created_at: string; tags?: string[] | null
+  category?: string | null
 }
 
 const LIMIT = 48
@@ -39,6 +42,7 @@ export default function WallpapersClient() {
   const [device, setDevice] = useState<DeviceOption>((searchParams.get('device') as DeviceOption) || 'all')
   const [search, setSearch] = useState(searchParams.get('q') || '')
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('q') || '')
+  const [exploreOpen, setExploreOpen] = useState(false)
 
   // Debounce search
   useEffect(() => {
@@ -67,7 +71,7 @@ export default function WallpapersClient() {
 
     let query = supabase
       .from('wallpapers')
-      .select('id, title, slug, thumbnail_url, is_premium, download_count, created_at')
+      .select('id, title, slug, thumbnail_url, image_url, is_premium, download_count, created_at, tags, category')
       .eq('is_active', true)
       .range(from, to)
 
@@ -108,21 +112,40 @@ export default function WallpapersClient() {
   const hasActiveFilters = device !== 'all' || filter !== 'all' || debouncedSearch
 
   return (
+    <>
+    {exploreOpen && wallpapers.length > 0 && (
+      <WallpaperExplore
+        wallpapers={wallpapers as WallpaperFull[]}
+        onClose={() => setExploreOpen(false)}
+      />
+    )}
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-1">
-          {device !== 'all'
-            ? `${activeDevice.icon} ${activeDevice.label} Wallpapers`
-            : 'Free HD Wallpapers'}
-        </h1>
-        <p className="text-gray-400 text-sm">
-          {device === 'iphone'  && 'High-res wallpapers optimized for iPhone lock screen and home screen.'}
-          {device === 'android' && 'HD wallpapers perfect for Samsung, Pixel, OnePlus and all Android phones.'}
-          {device === 'ipad'    && 'Ultra-resolution wallpapers for iPad Pro, Air and mini Retina displays.'}
-          {device === 'desktop' && '4K and HD desktop wallpapers for Windows and Mac.'}
-          {device === 'all'     && 'Download high quality wallpapers for iPhone, Android and desktop — completely free.'}
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-1">
+            {device !== 'all'
+              ? `${activeDevice.icon} ${activeDevice.label} Wallpapers`
+              : 'Free HD Wallpapers'}
+          </h1>
+          <p className="text-gray-400 text-sm">
+            {device === 'iphone'  && 'High-res wallpapers optimized for iPhone lock screen and home screen.'}
+            {device === 'android' && 'HD wallpapers perfect for Samsung, Pixel, OnePlus and all Android phones.'}
+            {device === 'ipad'    && 'Ultra-resolution wallpapers for iPad Pro, Air and mini Retina displays.'}
+            {device === 'desktop' && '4K and HD desktop wallpapers for Windows and Mac.'}
+            {device === 'all'     && 'Download high quality wallpapers for iPhone, Android and desktop — completely free.'}
+          </p>
+        </div>
+        <button
+          onClick={() => setExploreOpen(true)}
+          disabled={loading || wallpapers.length === 0}
+          className="flex-shrink-0 flex items-center gap-2 bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+          </svg>
+          Explore
+        </button>
       </div>
 
       {/* Device filter chips */}
@@ -265,5 +288,6 @@ export default function WallpapersClient() {
         </>
       )}
     </div>
+    </>
   )
 }
