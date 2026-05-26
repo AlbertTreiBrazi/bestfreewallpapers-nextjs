@@ -38,14 +38,15 @@ export default function ExtractColorsPage() {
         })
         const data: Stats = await res.json()
 
+        const errs = data.errors ?? []
         setTotal((prev) => ({
           processed: prev.processed + data.processed,
           updated: prev.updated + data.updated,
-          errors: prev.errors + data.errors.length,
+          errors: prev.errors + errs.length,
         }))
 
-        if (data.errors.length > 0) {
-          data.errors.forEach((e) => addLog(`  ⚠️ ${e}`))
+        if (errs.length > 0) {
+          errs.forEach((e) => addLog(`  ⚠️ ${e}`))
         }
 
         addLog(

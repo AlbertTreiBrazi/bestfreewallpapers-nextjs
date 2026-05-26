@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (!wallpapers || wallpapers.length === 0) {
-    return NextResponse.json({ processed: 0, updated: 0, remaining: 0, done: true })
+    return NextResponse.json({ processed: 0, updated: 0, remaining: 0, errors: [], done: true })
   }
 
   // Count remaining (approximate)
