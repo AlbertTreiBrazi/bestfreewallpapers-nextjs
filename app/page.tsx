@@ -4,8 +4,8 @@ import Image from 'next/image'
 import { createServerSupabaseClient } from '@/lib/supabase'
 import HomeHero from '@/components/home/HomeHero'
 import HomeRingtoneCard from '@/components/home/HomeRingtoneCard'
-import HomeLiveCard from '@/components/home/HomeLiveCard'
-import WallpaperCard from '@/components/wallpapers/WallpaperCard'
+import HomeTrendingSection from '@/components/home/HomeTrendingSection'
+import HomeLiveSection from '@/components/home/HomeLiveSection'
 import RecentlyViewedStrip from '@/components/home/RecentlyViewedStrip'
 
 export const metadata: Metadata = {
@@ -35,47 +35,61 @@ export const revalidate = 600
 async function getHomepageData() {
   const supabase = createServerSupabaseClient()
 
-  const [wallpapersRes, ringtonesRes, liveRes, categoriesRes, wallCountRes, ringCountRes, liveCountRes] = await Promise.all([
-    supabase.from('wallpapers')
-      .select('id, title, slug, thumbnail_url, image_url, download_count, is_premium, category')
-      .eq('is_active', true)
-      .order('download_count', { ascending: false })
-      .limit(8),
+  const wallSelect = 'id, title, slug, thumbnail_url, download_count, is_premium, created_at'
+  const liveSelect = 'id, title, slug, thumbnail_url, video_url, downloads_count, is_premium, duration_seconds, created_at'
+
+  const [
+    wallTrendingRes, wallNewestRes,
+    liveTrendingRes, liveNewestRes,
+    ringtonesRes,
+    categoriesRes,
+    wallCountRes, ringCountRes, liveCountRes,
+  ] = await Promise.all([
+    // Wallpapers: trending
+    supabase.from('wallpapers').select(wallSelect)
+      .eq('is_active', true).order('download_count', { ascending: false }).limit(8),
+    // Wallpapers: newest
+    supabase.from('wallpapers').select(wallSelect)
+      .eq('is_active', true).order('created_at', { ascending: false }).limit(8),
+    // Live: trending
+    supabase.from('live_wallpapers').select(liveSelect)
+      .eq('is_active', true).eq('is_published', true)
+      .order('downloads_count', { ascending: false }).limit(6),
+    // Live: newest
+    supabase.from('live_wallpapers').select(liveSelect)
+      .eq('is_active', true).eq('is_published', true)
+      .order('created_at', { ascending: false }).limit(6),
+    // Ringtones: trending only
     supabase.from('ringtones')
       .select('id, title, slug, cover_image_url, audio_url, duration_seconds, downloads_count, is_premium, created_at')
       .eq('is_active', true).eq('is_published', true)
-      .order('downloads_count', { ascending: false })
-      .limit(6),
-    supabase.from('live_wallpapers')
-      .select('id, title, slug, thumbnail_url, video_url, downloads_count, is_premium, duration_seconds, created_at')
-      .eq('is_active', true).eq('is_published', true)
-      .order('downloads_count', { ascending: false })
-      .limit(6),
-    supabase.from('categories')
-      .select('id, name, slug, cover_image_url')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true })
-      .limit(8),
+      .order('downloads_count', { ascending: false }).limit(6),
+    // Categories
+    supabase.from('categories').select('id, name, slug, cover_image_url')
+      .eq('is_active', true).order('display_order', { ascending: true }).limit(8),
+    // Counts
     supabase.from('wallpapers').select('id', { count: 'estimated', head: true }).eq('is_active', true),
     supabase.from('ringtones').select('id', { count: 'estimated', head: true }).eq('is_active', true).eq('is_published', true),
     supabase.from('live_wallpapers').select('id', { count: 'estimated', head: true }).eq('is_active', true).eq('is_published', true),
   ])
 
   return {
-    wallpapers: wallpapersRes.data || [],
-    ringtones: ringtonesRes.data || [],
-    liveWallpapers: liveRes.data || [],
-    categories: categoriesRes.data || [],
+    wallTrending:  wallTrendingRes.data || [],
+    wallNewest:    wallNewestRes.data || [],
+    liveTrending:  liveTrendingRes.data || [],
+    liveNewest:    liveNewestRes.data || [],
+    ringtones:     ringtonesRes.data || [],
+    categories:    categoriesRes.data || [],
     stats: {
       wallpapers: wallCountRes.count || 0,
-      ringtones: ringCountRes.count || 0,
-      live: liveCountRes.count || 0,
+      ringtones:  ringCountRes.count || 0,
+      live:       liveCountRes.count || 0,
     },
   }
 }
 
 export default async function HomePage() {
-  const { wallpapers, ringtones, liveWallpapers, categories, stats } = await getHomepageData()
+  const { wallTrending, wallNewest, liveTrending, liveNewest, ringtones, categories, stats } = await getHomepageData()
 
   return (
     <>
@@ -103,51 +117,13 @@ export default async function HomePage() {
         {/* 2. RECENTLY VIEWED — client-side, localStorage */}
         <RecentlyViewedStrip />
 
-        {/* 3. TRENDING WALLPAPERS */}
-        <section id="wallpapers">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Trending Wallpapers</h2>
-              <p className="text-gray-400 text-sm">Most downloaded HD wallpapers this week</p>
-            </div>
-            <Link href="/wallpapers" className="text-green-400 hover:text-green-300 text-sm font-medium whitespace-nowrap">
-              See all →
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {wallpapers.map((w: any) => (
-              <WallpaperCard
-                key={w.id}
-                id={w.id}
-                title={w.title}
-                slug={w.slug}
-                thumbnail_url={w.thumbnail_url}
-                is_premium={w.is_premium}
-                download_count={w.download_count}
-              />
-            ))}
-          </div>
-        </section>
+        {/* 3. TRENDING / NEW WALLPAPERS */}
+        <HomeTrendingSection trending={wallTrending} newest={wallNewest} />
 
-        {/* 3. LIVE WALLPAPERS */}
-        {liveWallpapers.length > 0 && (
-          <section id="live-wallpapers">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Live Wallpapers</h2>
-                <p className="text-gray-400 text-sm">Animated wallpapers for iPhone &amp; Android · hover to preview</p>
-              </div>
-              <Link href="/live-wallpapers" className="text-green-400 hover:text-green-300 text-sm font-medium whitespace-nowrap">
-                See all →
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {liveWallpapers.map((lw: any) => <HomeLiveCard key={lw.id} lw={lw} />)}
-            </div>
-          </section>
-        )}
+        {/* 4. LIVE WALLPAPERS */}
+        <HomeLiveSection trending={liveTrending} newest={liveNewest} />
 
-        {/* 4. RINGTONES */}
+        {/* 5. RINGTONES */}
         {ringtones.length > 0 && (
           <section id="ringtones">
             <div className="flex items-center justify-between mb-6">
@@ -165,7 +141,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* 5. CATEGORIES */}
+        {/* 6. CATEGORIES */}
         {categories.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-6">
@@ -199,7 +175,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* 6. SEO TEXT BLOCK */}
+        {/* 7. SEO TEXT BLOCK */}
         <section className="border-t border-gray-800 pt-10">
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4">About BestFreeWallpapers</h2>
           <div className="text-gray-400 text-sm leading-relaxed space-y-3">
