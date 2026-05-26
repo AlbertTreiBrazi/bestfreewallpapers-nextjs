@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { createAdminSupabaseClient } from '@/lib/supabase'
 import { rgbToColorBucket } from '@/lib/color-utils'
 
 export const runtime = 'nodejs'
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   }
 
   const offset = Number(req.nextUrl.searchParams.get('offset') ?? '0')
-  const supabase = createServerSupabaseClient()
+  const supabase = createAdminSupabaseClient()
 
   // Fetch a batch of wallpapers without dominant_color
   const { data: wallpapers, error } = await supabase
