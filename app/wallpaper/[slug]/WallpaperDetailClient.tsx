@@ -67,7 +67,7 @@ export default function WallpaperDetailClient({ wallpaper, related, collections 
 
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
           {/* Image — always visible */}
-          <div className="relative aspect-[9/16] max-h-[70vh] w-full mx-auto rounded-2xl overflow-hidden bg-gray-800 shadow-2xl" onContextMenu={(e) => e.preventDefault()}>
+          <div className="relative aspect-[9/16] md:max-h-[70vh] w-full mx-auto rounded-2xl overflow-hidden bg-gray-800 shadow-2xl" onContextMenu={(e) => e.preventDefault()}>
             {wallpaper.image_url ? (
               <Image
                 src={wallpaper.image_url}
