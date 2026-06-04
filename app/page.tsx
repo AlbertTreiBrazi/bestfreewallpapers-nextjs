@@ -66,7 +66,7 @@ async function getHomepageData() {
       .order('downloads_count', { ascending: false }).limit(6),
     // Categories
     supabase.from('categories').select('id, name, slug, cover_image_url')
-      .eq('is_active', true).order('display_order', { ascending: true }).limit(8),
+      .eq('is_active', true).order('sort_order', { ascending: true }).limit(8),
     // Counts
     supabase.from('wallpapers').select('id', { count: 'estimated', head: true }).eq('is_active', true),
     supabase.from('ringtones').select('id', { count: 'estimated', head: true }).eq('is_active', true).eq('is_published', true),

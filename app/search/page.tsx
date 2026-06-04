@@ -54,7 +54,7 @@ export default function SearchPage() {
   // Load categories once
   useEffect(() => {
     supabase.from('categories').select('id, name, slug').eq('is_active', true)
-      .order('display_order', { ascending: true }).limit(30)
+      .order('sort_order', { ascending: true }).limit(30)
       .then(({ data }) => setCategories(data || []))
   }, [])
 
@@ -64,16 +64,16 @@ export default function SearchPage() {
     setWallpapers([]); setRingtones([]); setLives([])
   }, [query, type, sort, categorySlug])
 
-  const fetchResults = useCallback(async (q: string, append = false) => {
+  const fetchResults = useCallback(async (q: string, append = false, pageOverride?: { wall: number; ring: number; live: number }) => {
     if (!q.trim() || q.length < 2) {
       setWallpapers([]); setRingtones([]); setLives([])
       return
     }
     append ? setLoadingMore(true) : setLoading(true)
 
-    const currentWallPage = append ? wallPage : 0
-    const currentRingPage = append ? ringPage : 0
-    const currentLivePage = append ? livePage : 0
+    const currentWallPage = append ? (pageOverride?.wall ?? wallPage) : 0
+    const currentRingPage = append ? (pageOverride?.ring ?? ringPage) : 0
+    const currentLivePage = append ? (pageOverride?.live ?? livePage) : 0
 
     try {
       const wallSortCol  = sort === 'popular' ? 'download_count' : 'created_at'
@@ -140,7 +140,7 @@ export default function SearchPage() {
     const nextRing = ringPage + 1
     const nextLive = livePage + 1
     setWallPage(nextWall); setRingPage(nextRing); setLivePage(nextLive)
-    await fetchResults(query, true)
+    await fetchResults(query, true, { wall: nextWall, ring: nextRing, live: nextLive })
   }
 
   const totalResults = wallpapers.length + ringtones.length + lives.length

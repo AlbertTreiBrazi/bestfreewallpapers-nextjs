@@ -5,7 +5,7 @@ export interface Wallpaper {
   description: string | null
   image_url: string
   thumbnail_url: string | null
-  download_url: string
+  download_url: string | null
   width: number
   height: number
   category: string | null
