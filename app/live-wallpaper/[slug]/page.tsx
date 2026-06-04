@@ -9,7 +9,8 @@ interface Props { params: Promise<{ slug: string }> }
 
 async function getLiveWallpaper(slug: string): Promise<LiveWallpaper | null> {
   const supabase = createServerSupabaseClient()
-  const { data } = await supabase.from('live_wallpapers').select('*').eq('slug', slug).eq('is_active', true).eq('is_published', true).single()
+  const { data, error } = await supabase.from('live_wallpapers').select('*').eq('slug', slug).eq('is_active', true).eq('is_published', true).single()
+  if (error) return null
   return data as LiveWallpaper | null
 }
 

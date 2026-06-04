@@ -49,7 +49,8 @@ interface Collection {
 
 async function getCollection(slug: string): Promise<Collection | null> {
   const supabase = createServerSupabaseClient()
-  const { data } = await supabase.from('collections').select('*').eq('slug', slug).eq('is_active', true).single()
+  const { data, error } = await supabase.from('collections').select('*').eq('slug', slug).eq('is_active', true).single()
+  if (error) return null
   return data as Collection | null
 }
 

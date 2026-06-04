@@ -25,12 +25,13 @@ export interface CategoryInfo {
 
 async function getWallpaper(slug: string): Promise<Wallpaper | null> {
   const supabase = createServerSupabaseClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('wallpapers')
     .select('*')
     .eq('slug', slug)
     .eq('is_active', true)
     .single()
+  if (error) return null
   return data as Wallpaper | null
 }
 
@@ -90,11 +91,12 @@ async function getRelated(
 async function getCategoryInfo(categoryId: number | null): Promise<CategoryInfo | null> {
   if (!categoryId) return null
   const supabase = createServerSupabaseClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('categories')
     .select('name, slug')
     .eq('id', categoryId)
     .single()
+  if (error) return null
   return data as CategoryInfo | null
 }
 

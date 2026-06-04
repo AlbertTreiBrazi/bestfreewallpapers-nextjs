@@ -9,7 +9,8 @@ interface Props { params: Promise<{ slug: string }> }
 
 async function getRingtone(slug: string): Promise<Ringtone | null> {
   const supabase = createServerSupabaseClient()
-  const { data } = await supabase.from('ringtones').select('*').eq('slug', slug).eq('is_active', true).eq('is_published', true).single()
+  const { data, error } = await supabase.from('ringtones').select('*').eq('slug', slug).eq('is_active', true).eq('is_published', true).single()
+  if (error) return null
   return data as Ringtone | null
 }
 

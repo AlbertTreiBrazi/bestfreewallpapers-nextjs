@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import WallpaperCard from '@/components/wallpapers/WallpaperCard'
@@ -37,7 +37,7 @@ export default function WallpapersClient() {
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(0)
+  const pageRef = useRef(0)
   const [sort, setSort] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'popular')
   const [filter, setFilter] = useState<FilterOption>((searchParams.get('filter') as FilterOption) || 'all')
   const [device, setDevice] = useState<DeviceOption>((searchParams.get('device') as DeviceOption) || 'all')
@@ -69,7 +69,7 @@ export default function WallpapersClient() {
     if (isReset) setLoading(true)
     else setLoadingMore(true)
 
-    const from = isReset ? 0 : page * LIMIT
+    const from = isReset ? 0 : pageRef.current * LIMIT
     const to = from + LIMIT - 1
 
     let query = supabase
@@ -104,19 +104,20 @@ export default function WallpapersClient() {
 
     if (isReset) {
       setWallpapers(items)
-      setPage(1)
+      pageRef.current = 1
     } else {
       setWallpapers(prev => [...prev, ...items])
-      setPage(p => p + 1)
+      pageRef.current += 1
     }
 
     setHasMore(items.length === LIMIT)
     setLoading(false)
     setLoadingMore(false)
-  }, [sort, filter, device, color, debouncedSearch, page])
+  }, [sort, filter, device, color, debouncedSearch])
 
   // Reset and fetch when filters change
   useEffect(() => {
+    pageRef.current = 0
     fetchWallpapers(true)
   }, [sort, filter, device, color, debouncedSearch]) // eslint-disable-line
 

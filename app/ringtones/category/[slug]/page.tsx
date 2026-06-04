@@ -11,12 +11,13 @@ interface Props {
 
 async function getCategory(slug: string): Promise<RingtoneCategory | null> {
   const supabase = createServerSupabaseClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('ringtone_categories')
     .select('*')
     .eq('slug', slug)
     .eq('is_active', true)
     .single()
+  if (error) return null
   return data as RingtoneCategory | null
 }
 

@@ -12,12 +12,13 @@ interface Props {
 
 async function getCategory(slug: string): Promise<Category | null> {
   const supabase = createServerSupabaseClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('categories')
     .select('*')
     .eq('slug', slug)
     .eq('is_active', true)
     .single()
+  if (error) return null
   return data as Category | null
 }
 
