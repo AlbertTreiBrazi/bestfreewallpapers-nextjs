@@ -1,11 +1,17 @@
 import { createClient } from '@supabase/supabase-js'
 
-// NEXT_PUBLIC_ vars are inlined at build time.
-// For production: set them in Vercel dashboard / deployment env.
-// For local dev: copy .env.local.example → .env.local and fill in your values.
-// For CI builds without env vars: the build compiles but runtime DB calls fail gracefully.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
+function requireEnv(value: string | undefined, name: string): string {
+  if (!value) {
+    throw new Error(
+      `Missing required environment variable: ${name}.\n` +
+      'Copy .env.local.example → .env.local and fill in your Supabase project values.',
+    )
+  }
+  return value
+}
+
+const supabaseUrl = requireEnv(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL')
+const supabaseAnonKey = requireEnv(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY')
 
 export const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || 'https://cdn.bestfreewallpapers.com'
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bestfreewallpapers.com'
