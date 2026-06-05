@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import sharp from 'sharp'
 import { createAdminSupabaseClient } from '@/lib/supabase'
 import { rgbToColorBucket } from '@/lib/color-utils'
@@ -16,20 +15,17 @@ const BATCH = 10
  * Returns { processed, updated, remaining, errors[] }
  */
 export async function GET(req: NextRequest) {
-  // Verify caller is an authenticated admin via session cookie
-  const cookieStore = await cookies()
-  const supabaseAuth = createServerClient(
+  // Verify caller via JWT from Authorization: Bearer <token>
+  // The client sends session.access_token from localStorage-based auth.
+  const token = req.headers.get('authorization')?.replace('Bearer ', '').trim()
+  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const supabaseAuth = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll() {},
-      },
-    },
   )
-  const { data: { user } } = await supabaseAuth.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token)
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await supabaseAuth
     .from('profiles')

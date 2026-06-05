@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
 import { COLOR_OPTIONS } from '@/lib/color-utils'
 
 interface Stats {
@@ -12,6 +13,7 @@ interface Stats {
 }
 
 export default function ExtractColorsPage() {
+  const { session } = useAuth()
   const [running, setRunning] = useState(false)
   const [log, setLog] = useState<string[]>([])
   const [total, setTotal] = useState({ processed: 0, updated: 0, errors: 0 })
@@ -20,6 +22,11 @@ export default function ExtractColorsPage() {
   const addLog = (msg: string) => setLog((prev) => [...prev.slice(-100), msg])
 
   const run = async () => {
+    if (!session?.access_token) {
+      addLog('❌ No active session — please sign in again.')
+      return
+    }
+
     setRunning(true)
     setDone(false)
     setLog([])
@@ -31,7 +38,9 @@ export default function ExtractColorsPage() {
     while (!batchDone) {
       try {
         addLog(`⏳ Processing batch at offset ${offset}…`)
-        const res = await fetch(`/api/admin/extract-colors?offset=${offset}`)
+        const res = await fetch(`/api/admin/extract-colors?offset=${offset}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
         const data: Stats = await res.json()
 
         const errs = data.errors ?? []
