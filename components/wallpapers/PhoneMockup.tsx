@@ -18,9 +18,7 @@ export default function PhoneMockup({ children }: { children: ReactNode }) {
 
           {/* Screen */}
           <div className="relative aspect-[9/16] rounded-[2.15rem] overflow-hidden bg-gray-800">
-            {/* Dynamic Island */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 w-[58px] h-[18px] md:w-[64px] md:h-[20px] bg-black rounded-full" />
-            {children}
+              {children}
           </div>
 
           {/* Home indicator */}
