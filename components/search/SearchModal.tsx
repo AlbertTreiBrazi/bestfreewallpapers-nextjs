@@ -164,6 +164,12 @@ export default function SearchModal({ isOpen, onClose }: Props) {
             type="search"
             value={query}
             onChange={(e) => handleQueryChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && query.trim()) {
+                router.push(`/search?q=${encodeURIComponent(query.trim())}`)
+                onClose()
+              }
+            }}
             placeholder="Search wallpapers, ringtones, live..."
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
