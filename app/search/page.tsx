@@ -223,7 +223,7 @@ export default function SearchPage() {
           {(type === 'wallpaper') && categories.length > 0 && (
             <select
               value={categoryId}
-              onChange={e => setCategorySlug(e.target.value)}
+              onChange={e => setCategoryId(e.target.value)}
               className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-600 cursor-pointer"
             >
               <option value="">All Categories</option>
