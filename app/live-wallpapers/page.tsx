@@ -25,12 +25,12 @@ function LiveWallpaperCard({ lw }: { lw: LiveWallpaper }) {
     const el = cardRef.current
     if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting && !videoLoaded) setVideoLoaded(true) },
+      ([entry]) => { if (entry.isIntersecting) setVideoLoaded(true) },
       { threshold: 0.1 }
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [videoLoaded])
+  }, [])
 
   const handleMouseEnter = () => {
     if (videoRef.current && videoLoaded) {

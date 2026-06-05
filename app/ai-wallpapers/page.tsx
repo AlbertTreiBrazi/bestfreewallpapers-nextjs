@@ -42,7 +42,8 @@ export default async function AIWallpapersPage() {
     .from('categories')
     .select('id')
     .ilike('name', '%ai%')
-    .single()
+    .limit(1)
+    .maybeSingle()
 
   let wallpapers: Wallpaper[] = []
 
