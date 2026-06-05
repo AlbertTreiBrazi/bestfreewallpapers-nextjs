@@ -31,11 +31,7 @@ export default function ExtractColorsPage() {
     while (!batchDone) {
       try {
         addLog(`⏳ Processing batch at offset ${offset}…`)
-        const res = await fetch(`/api/admin/extract-colors?offset=${offset}`, {
-          headers: process.env.NEXT_PUBLIC_ADMIN_SECRET
-            ? { 'x-admin-secret': process.env.NEXT_PUBLIC_ADMIN_SECRET }
-            : {},
-        })
+        const res = await fetch(`/api/admin/extract-colors?offset=${offset}`)
         const data: Stats = await res.json()
 
         const errs = data.errors ?? []

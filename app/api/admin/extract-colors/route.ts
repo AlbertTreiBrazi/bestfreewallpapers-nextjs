@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
 import sharp from 'sharp'
 import { createAdminSupabaseClient } from '@/lib/supabase'
 import { rgbToColorBucket } from '@/lib/color-utils'
@@ -14,12 +16,27 @@ const BATCH = 10
  * Returns { processed, updated, remaining, errors[] }
  */
 export async function GET(req: NextRequest) {
-  // Simple auth guard — only accessible in development or with secret header
-  const secret = req.headers.get('x-admin-secret')
-  const envSecret = process.env.ADMIN_SECRET
-  if (envSecret && secret !== envSecret) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  // Verify caller is an authenticated admin via session cookie
+  const cookieStore = await cookies()
+  const supabaseAuth = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll() {},
+      },
+    },
+  )
+  const { data: { user } } = await supabaseAuth.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { data: profile } = await supabaseAuth
+    .from('profiles')
+    .select('is_admin')
+    .eq('user_id', user.id)
+    .single()
+  if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const offset = Number(req.nextUrl.searchParams.get('offset') ?? '0')
   const supabase = createAdminSupabaseClient()
