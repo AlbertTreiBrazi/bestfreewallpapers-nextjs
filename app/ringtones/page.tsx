@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { useFavorites } from '@/hooks/useFavorites'
-import { useAuth } from '@/contexts/AuthContext'
 import type { Ringtone, RingtoneCategory } from '@/types'
 import RingtoneExplore from '@/components/ringtones/RingtoneExplore'
 
@@ -18,7 +17,6 @@ function formatDuration(s: number) {
 }
 
 function RingtoneCard({ ringtone }: { ringtone: Ringtone }) {
-  const { user } = useAuth()
   const { isFavorite, toggleFavorite } = useFavorites()
   const faved = isFavorite(ringtone.id, 'ringtone')
   const audioRef = useRef<HTMLAudioElement>(null)
@@ -155,7 +153,6 @@ export default function RingtonesPage() {
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(0)
   const pageRef = useRef(0)
   const [sort, setSort] = useState<SortOption>('popular')
   const [search, setSearch] = useState('')
@@ -201,11 +198,9 @@ export default function RingtonesPage() {
     if (reset) {
       setRingtones(items)
       pageRef.current = 1
-      setPage(1)
     } else {
       setRingtones(prev => [...prev, ...items])
       pageRef.current += 1
-      setPage(p => p + 1)
     }
 
     setHasMore(items.length === LIMIT)

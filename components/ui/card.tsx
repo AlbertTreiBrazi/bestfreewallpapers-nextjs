@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
+type CardProps = React.HTMLAttributes<HTMLDivElement>
 
 export function Card({ className = '', ...props }: CardProps) {
   return <div className={`bg-gray-800 border border-gray-700 rounded-xl shadow-sm ${className}`} {...props} />

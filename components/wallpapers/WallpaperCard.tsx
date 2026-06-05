@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useAuth } from '@/contexts/AuthContext'
 import { useFavorites } from '@/hooks/useFavorites'
 
 function isNew(createdAt?: string): boolean {
@@ -21,7 +20,6 @@ interface WallpaperCardProps {
 }
 
 export default function WallpaperCard({ id, title, slug, thumbnail_url, is_premium, download_count, created_at }: WallpaperCardProps) {
-  const { user } = useAuth()
   const { isFavorite, toggleFavorite } = useFavorites()
   const faved = isFavorite(id, 'wallpaper')
 

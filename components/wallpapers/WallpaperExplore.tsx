@@ -14,7 +14,7 @@ interface CardProps {
   onBecomeActive: (i: number) => void
 }
 
-function ExploreCard({ wallpaper, index, total, isActive, onBecomeActive }: CardProps) {
+function ExploreCard({ wallpaper, index, total, isActive: _isActive, onBecomeActive }: CardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const { isFavorite, toggleFavorite } = useFavorites()
   const faved = isFavorite(wallpaper.id, 'wallpaper')

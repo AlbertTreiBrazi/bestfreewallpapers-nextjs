@@ -142,7 +142,6 @@ export default function LiveWallpapersPage() {
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(0)
   const pageRef = useRef(0)
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -185,11 +184,9 @@ export default function LiveWallpapersPage() {
     if (reset) {
       setWallpapers(items)
       pageRef.current = 1
-      setPage(1)
     } else {
       setWallpapers(prev => [...prev, ...items])
       pageRef.current += 1
-      setPage(p => p + 1)
     }
 
     setHasMore(items.length === LIMIT)

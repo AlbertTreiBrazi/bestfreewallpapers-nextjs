@@ -69,7 +69,7 @@ export default function SearchPage() {
       setWallpapers([]); setRingtones([]); setLives([])
       return
     }
-    append ? setLoadingMore(true) : setLoading(true)
+    if (append) { setLoadingMore(true) } else { setLoading(true) }
 
     const currentWallPage = append ? (pageOverride?.wall ?? wallPage) : 0
     const currentRingPage = append ? (pageOverride?.ring ?? ringPage) : 0

@@ -1,7 +1,5 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
-import Link from 'next/link'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
 import { breadcrumbSchema } from '@/lib/structured-data'
 import type { Wallpaper } from '@/types'

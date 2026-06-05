@@ -13,10 +13,7 @@ interface SearchResult {
   type: 'wallpaper' | 'ringtone' | 'live'
 }
 
-interface PopularTag {
-  tag: string
-  count: number
-}
+
 
 interface Props {
   isOpen: boolean
