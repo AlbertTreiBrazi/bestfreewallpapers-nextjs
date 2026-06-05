@@ -17,34 +17,25 @@ async function getCategory(slug: string): Promise<RingtoneCategory> {
     .eq('is_active', true)
     .maybeSingle()
   if (data) return data as RingtoneCategory
+  // slug may be kebab-case ("sunny-beach") — convert to display name
   const name = slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
   return { id: 0, name, slug, description: null, preview_image: null, is_active: true, sort_order: 0, seo_title: null, seo_description: null }
 }
 
 async function getRingtones(categorySlug: string): Promise<Ringtone[]> {
   const supabase = createServerSupabaseClient()
+  // slug is kebab-case ("sunny-beach"); DB tags use spaces ("sunny beach")
+  const tag = categorySlug.replace(/-/g, ' ')
   const { data } = await supabase
     .from('ringtones')
     .select('id, title, slug, cover_image_url, duration_seconds, downloads_count, is_premium, audio_url, tags')
     .eq('is_active', true)
     .eq('is_published', true)
-    .contains('tags', [categorySlug])
+    .contains('tags', [tag])
     .order('downloads_count', { ascending: false })
     .limit(40)
 
-  // Fallback: fetch all if category filter returns nothing
-  if (!data || data.length === 0) {
-    const { data: all } = await supabase
-      .from('ringtones')
-      .select('id, title, slug, cover_image_url, duration_seconds, downloads_count, is_premium, audio_url, tags')
-      .eq('is_active', true)
-      .eq('is_published', true)
-      .order('downloads_count', { ascending: false })
-      .limit(20)
-    return (all || []) as Ringtone[]
-  }
-
-  return data as Ringtone[]
+  return (data || []) as Ringtone[]
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

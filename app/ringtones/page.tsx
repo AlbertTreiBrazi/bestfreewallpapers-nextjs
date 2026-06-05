@@ -172,7 +172,7 @@ export default function RingtonesPage() {
         setCategories(unique.map((name: string) => ({
           id: 0,
           name: name.charAt(0).toUpperCase() + name.slice(1),
-          slug: name,
+          slug: name.toLowerCase().replace(/\s+/g, '-'),
           description: null,
           preview_image: null,
           is_active: true,

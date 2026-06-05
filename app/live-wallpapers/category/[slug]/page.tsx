@@ -42,11 +42,14 @@ async function getWallpapers(categorySlug: string): Promise<LiveWallpaper[]> {
 async function getAllCategories(): Promise<NavCategory[]> {
   const supabase = createServerSupabaseClient()
   const { data } = await supabase
-    .from('live_wallpaper_categories')
-    .select('id, name, slug')
+    .from('live_wallpapers')
+    .select('category')
     .eq('is_active', true)
-    .order('sort_order', { ascending: true })
-  return (data || []) as NavCategory[]
+    .eq('is_published', true)
+    .not('category', 'is', null)
+    .limit(200)
+  const unique = [...new Set((data || []).map((d: any) => d.category).filter(Boolean))] as string[]
+  return unique.map((name, i) => ({ id: i, name: name.charAt(0).toUpperCase() + name.slice(1), slug: name }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -91,7 +94,7 @@ export default async function LiveCategoryPage({ params }: Props) {
       {/* Hero — slimmed down */}
       <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-5 sm:p-6 mb-4 border border-gray-700">
         <h1 className="text-xl md:text-2xl font-bold text-white mb-1">{cat.name} Live Wallpapers</h1>
-        <p className="text-gray-400 text-sm mb-3">{wallpapers.length} wallpapers available</p>
+        <p className="text-gray-400 text-sm mb-3">{wallpapers.length} {wallpapers.length === 1 ? 'wallpaper' : 'wallpapers'} available</p>
         {cat.description && <p className="text-gray-300 text-sm leading-relaxed mb-4">{cat.description}</p>}
         <div className="flex flex-wrap gap-2">
           <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full">✓ Free Download</span>
@@ -136,7 +139,7 @@ export default async function LiveCategoryPage({ params }: Props) {
               href={`/live-wallpaper/${lw.slug}`}
               className="group relative rounded-xl overflow-hidden bg-gray-900 aspect-[9/16] block"
             >
-              {lw.thumbnail_url && (
+              {lw.thumbnail_url ? (
                 <Image
                   src={lw.thumbnail_url}
                   alt={lw.title}
@@ -144,6 +147,10 @@ export default async function LiveCategoryPage({ params }: Props) {
                   sizes="(max-width: 640px) 50vw, 16vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                  <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                </div>
               )}
               {lw.is_premium && (
                 <span className="absolute top-2 left-2 bg-yellow-500 text-black text-xs px-1.5 py-0.5 rounded font-medium z-10">PRO</span>
