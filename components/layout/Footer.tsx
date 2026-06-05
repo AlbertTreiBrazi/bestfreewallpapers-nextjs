@@ -42,10 +42,10 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-gray-500 text-xs">
+          <p className="text-gray-400 text-xs">
             © {new Date().getFullYear()} BestFreeWallpapers.com — Free for personal use
           </p>
-          <p className="text-gray-600 text-xs">
+          <p className="text-gray-500 text-xs">
             Made with ❤ for wallpaper lovers
           </p>
         </div>

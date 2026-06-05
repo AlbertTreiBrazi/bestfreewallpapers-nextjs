@@ -37,7 +37,7 @@ export default function HomeLiveSection({ trending, newest }: Props) {
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 tab === 'trending'
                   ? 'bg-gray-700 text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-300'
+                  : 'text-gray-400 hover:text-gray-200'
               }`}
             >
               <span>🔥</span>
@@ -48,7 +48,7 @@ export default function HomeLiveSection({ trending, newest }: Props) {
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 tab === 'new'
                   ? 'bg-gray-700 text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-300'
+                  : 'text-gray-400 hover:text-gray-200'
               }`}
             >
               <span>✨</span>

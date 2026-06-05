@@ -183,28 +183,28 @@ export default async function HomePage() {
               <strong className="text-gray-200">BestFreeWallpapers</strong> is your destination for downloading high-quality free wallpapers, live animated wallpapers, and ringtones for iPhone, Android, Samsung Galaxy, and iPad devices. Our collection features {stats.wallpapers}+ HD mobile wallpapers across categories like aesthetic, dark, nature, anime, space, abstract, and minimal designs.
             </p>
             <p>
-              Whether you&apos;re looking for <Link href="/category/aesthetic" className="text-green-400 hover:underline">aesthetic wallpapers</Link>, <Link href="/category/dark" className="text-green-400 hover:underline">dark themes</Link>, or stunning <Link href="/live-wallpapers" className="text-green-400 hover:underline">live wallpapers</Link>, we&apos;ve got you covered. All our content is 100% free to download — no registration required, no watermarks, no hidden costs. Premium wallpapers offer ad-free downloads and exclusive 4K resolution.
+              Whether you&apos;re looking for <Link href="/category/aesthetic" className="text-green-400 underline decoration-green-400/60 hover:decoration-green-300">aesthetic wallpapers</Link>, <Link href="/category/dark" className="text-green-400 underline decoration-green-400/60 hover:decoration-green-300">dark themes</Link>, or stunning <Link href="/live-wallpapers" className="text-green-400 underline decoration-green-400/60 hover:decoration-green-300">live wallpapers</Link>, we&apos;ve got you covered. All our content is 100% free to download — no registration required, no watermarks, no hidden costs. Premium wallpapers offer ad-free downloads and exclusive 4K resolution.
             </p>
             <p>
               All wallpapers are available in mobile-optimized resolutions — including <strong className="text-gray-200">iPhone lock screen</strong> (1170×2532 for iPhone 14/15), full HD Android (1080×1920), and <strong className="text-gray-200">4K desktop</strong> backgrounds, ensuring sharp, pixel-perfect results on any screen.
             </p>
             <p>
-              In addition to wallpapers, we offer free <Link href="/ringtones" className="text-green-400 hover:underline">MP3 and M4R ringtones</Link> for your smartphone — perfect for personalizing your iPhone calls, Android notifications, and alarm sounds. New wallpapers and ringtones added weekly.
+              In addition to wallpapers, we offer free <Link href="/ringtones" className="text-green-400 underline decoration-green-400/60 hover:decoration-green-300">MP3 and M4R ringtones</Link> for your smartphone — perfect for personalizing your iPhone calls, Android notifications, and alarm sounds. New wallpapers and ringtones added weekly.
             </p>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-800">
             <div className="text-center">
               <div className="text-2xl md:text-3xl font-bold text-green-400">{stats.wallpapers}+</div>
-              <div className="text-gray-500 text-xs mt-1">Wallpapers</div>
+              <div className="text-gray-400 text-xs mt-1">Wallpapers</div>
             </div>
             <div className="text-center">
               <div className="text-2xl md:text-3xl font-bold text-green-400">{stats.ringtones}+</div>
-              <div className="text-gray-500 text-xs mt-1">Ringtones</div>
+              <div className="text-gray-400 text-xs mt-1">Ringtones</div>
             </div>
             <div className="text-center">
               <div className="text-2xl md:text-3xl font-bold text-green-400">{stats.live}+</div>
-              <div className="text-gray-500 text-xs mt-1">Live Wallpapers</div>
+              <div className="text-gray-400 text-xs mt-1">Live Wallpapers</div>
             </div>
           </div>
         </section>

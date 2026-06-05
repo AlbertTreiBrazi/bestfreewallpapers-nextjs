@@ -187,6 +187,7 @@ interface Props {
 export default function WallpaperExplore({ wallpapers, onClose }: Props) {
   const [activeIndex, setActiveIndex] = useState(0)
   const handleBecomeActive = useCallback((i: number) => setActiveIndex(i), [])
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // Lock body scroll while open
   useEffect(() => {
@@ -195,10 +196,15 @@ export default function WallpaperExplore({ wallpapers, onClose }: Props) {
     return () => { document.body.style.overflow = prev }
   }, [])
 
-  // Escape key closes
+  // Keyboard navigation: Escape closes, ArrowDown/ArrowUp scroll to next/prev
   useEffect(() => {
-    if (!onClose) return
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onClose?.(); return }
+      if (!scrollRef.current) return
+      const h = scrollRef.current.clientHeight
+      if (e.key === 'ArrowDown') { e.preventDefault(); scrollRef.current.scrollBy({ top: h, behavior: 'smooth' }) }
+      if (e.key === 'ArrowUp')   { e.preventDefault(); scrollRef.current.scrollBy({ top: -h, behavior: 'smooth' }) }
+    }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
@@ -224,8 +230,8 @@ export default function WallpaperExplore({ wallpapers, onClose }: Props) {
         <span className="text-white text-xs font-medium">Wallpapers</span>
       </div>
 
-      {/* Snap scroll container */}
-      <div className="h-full overflow-y-scroll snap-y snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Snap scroll container — keyboard ArrowUp/Down navigates on desktop */}
+      <div ref={scrollRef} className="h-full overflow-y-scroll snap-y snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {wallpapers.map((w, i) => (
           <ExploreCard
             key={w.id}

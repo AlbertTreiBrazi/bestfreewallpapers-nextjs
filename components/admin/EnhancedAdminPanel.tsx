@@ -696,8 +696,6 @@ export function EnhancedAdminPanel() {
                   {/* External tool pages */}
                   <a
                     href="/admin/colors"
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="flex items-center space-x-2 py-2 px-3 rounded-lg font-medium text-sm transition-all duration-150 text-theme-secondary hover:text-white hover:bg-purple-500/20 border border-transparent hover:border-purple-500/30"
                   >
                     <span>🎨</span>

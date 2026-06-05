@@ -57,44 +57,44 @@ export default function SearchModal({ isOpen, onClose }: Props) {
   const search = useCallback(async (q: string, filter: typeof activeFilter) => {
     if (!q.trim() || q.length < 2) { setResults([]); return }
     setLoading(true)
+    const tag = q.toLowerCase()
+    const lim = (base: number) => filter === 'all' ? base : 16
+    const noResult = { data: [] as any[] }
+
+    // Deduplicates by id, title results first then tag results
+    const dedup = (a: any[], b: any[]) => {
+      const seen = new Set<number>()
+      const out: any[] = []
+      for (const x of [...a, ...b]) {
+        if (!seen.has(x.id)) { seen.add(x.id); out.push(x) }
+      }
+      return out
+    }
+
     try {
-      const queries = []
+      const [wallByTitle, wallByTags, ringsData, liveByTitle, liveByTags] = await Promise.all([
+        (filter === 'all' || filter === 'wallpapers')
+          ? supabase.from('wallpapers').select('id, title, slug, thumbnail_url').eq('is_active', true).ilike('title', `%${q}%`).limit(lim(8))
+          : noResult,
+        (filter === 'all' || filter === 'wallpapers')
+          ? supabase.from('wallpapers').select('id, title, slug, thumbnail_url').eq('is_active', true).contains('tags', [tag]).limit(lim(8))
+          : noResult,
+        (filter === 'all' || filter === 'ringtones')
+          ? supabase.from('ringtones').select('id, title, slug, cover_image_url').eq('is_active', true).eq('is_published', true).ilike('title', `%${q}%`).limit(lim(4))
+          : noResult,
+        (filter === 'all' || filter === 'live')
+          ? supabase.from('live_wallpapers').select('id, title, slug, thumbnail_url').eq('is_active', true).eq('is_published', true).ilike('title', `%${q}%`).limit(lim(4))
+          : noResult,
+        (filter === 'all' || filter === 'live')
+          ? supabase.from('live_wallpapers').select('id, title, slug, thumbnail_url').eq('is_active', true).eq('is_published', true).contains('tags', [tag]).limit(lim(4))
+          : noResult,
+      ])
 
-      if (filter === 'all' || filter === 'wallpapers') {
-        queries.push(
-          supabase.from('wallpapers').select('id, title, slug, thumbnail_url')
-            .eq('is_active', true).ilike('title', `%${q}%`).limit(filter === 'all' ? 8 : 16)
-        )
-      }
-      if (filter === 'all' || filter === 'ringtones') {
-        queries.push(
-          supabase.from('ringtones').select('id, title, slug, cover_image_url')
-            .eq('is_active', true).eq('is_published', true).ilike('title', `%${q}%`).limit(filter === 'all' ? 4 : 16)
-        )
-      }
-      if (filter === 'all' || filter === 'live') {
-        queries.push(
-          supabase.from('live_wallpapers').select('id, title, slug, thumbnail_url')
-            .eq('is_active', true).eq('is_published', true).ilike('title', `%${q}%`).limit(filter === 'all' ? 4 : 16)
-        )
-      }
-
-      const responses = await Promise.all(queries)
-      const combined: SearchResult[] = []
-
-      let idx = 0
-      if (filter === 'all' || filter === 'wallpapers') {
-        const data = responses[idx++].data || []
-        combined.push(...data.map((w: any) => ({ ...w, type: 'wallpaper' as const })))
-      }
-      if (filter === 'all' || filter === 'ringtones') {
-        const data = responses[idx++].data || []
-        combined.push(...data.map((r: any) => ({ id: r.id, title: r.title, slug: r.slug, thumbnail_url: r.cover_image_url, type: 'ringtone' as const })))
-      }
-      if (filter === 'all' || filter === 'live') {
-        const data = responses[idx++].data || []
-        combined.push(...data.map((l: any) => ({ ...l, type: 'live' as const })))
-      }
+      const combined: SearchResult[] = [
+        ...dedup(wallByTitle.data ?? [], wallByTags.data ?? []).map((w: any) => ({ ...w, type: 'wallpaper' as const })),
+        ...(ringsData.data ?? []).map((r: any) => ({ id: r.id, title: r.title, slug: r.slug, thumbnail_url: r.cover_image_url, type: 'ringtone' as const })),
+        ...dedup(liveByTitle.data ?? [], liveByTags.data ?? []).map((l: any) => ({ ...l, type: 'live' as const })),
+      ]
 
       setResults(combined)
     } finally {
