@@ -8,14 +8,14 @@ export default function AuthCallbackPage() {
   const router = useRouter()
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') {
         router.replace('/')
       }
     })
     // Fallback redirect after 3s
     const t = setTimeout(() => router.replace('/'), 3000)
-    return () => clearTimeout(t)
+    return () => { clearTimeout(t); subscription.unsubscribe() }
   }, [router])
 
   return (

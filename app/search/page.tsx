@@ -33,7 +33,7 @@ export default function SearchPage() {
   const [query, setQuery]           = useState('')
   const [type, setType]             = useState<ContentType>('all')
   const [sort, setSort]             = useState<SortType>('popular')
-  const [categorySlug, setCategorySlug] = useState('')
+  const [categoryId, setCategoryId] = useState('')
   const [categories, setCategories] = useState<Category[]>([])
 
   const [wallpapers, setWallpapers] = useState<WallpaperResult[]>([])
@@ -62,7 +62,7 @@ export default function SearchPage() {
   useEffect(() => {
     setWallPage(0); setRingPage(0); setLivePage(0)
     setWallpapers([]); setRingtones([]); setLives([])
-  }, [query, type, sort, categorySlug])
+  }, [query, type, sort, categoryId])
 
   const fetchResults = useCallback(async (q: string, append = false, pageOverride?: { wall: number; ring: number; live: number }) => {
     if (!q.trim() || q.length < 2) {
@@ -88,7 +88,7 @@ export default function SearchPage() {
             .ilike('title', `%${q}%`)
             .order(wallSortCol, { ascending: false })
             .range(currentWallPage * PAGE_SIZE, (currentWallPage + 1) * PAGE_SIZE)
-          if (categorySlug) q2 = q2.eq('category', categorySlug)
+          if (categoryId) q2 = q2.eq('category_id', Number(categoryId))
           return q2
         })() : Promise.resolve({ data: null, error: null }),
 
@@ -117,23 +117,27 @@ export default function SearchPage() {
       const newRing = (ringRes.data || []) as RingtoneResult[]
       const newLive = (liveRes.data || []) as LiveResult[]
 
-      setWallpapers(prev => append ? [...prev, ...newWall] : newWall)
-      setRingtones(prev => append ? [...prev, ...newRing] : newRing)
-      setLives(prev => append ? [...prev, ...newLive] : newLive)
-
       setHasMoreWall(newWall.length === PAGE_SIZE + 1)
       setHasMoreRing(newRing.length === PAGE_SIZE + 1)
       setHasMoreLive(newLive.length === PAGE_SIZE + 1)
+
+      const wallSliced = newWall.slice(0, PAGE_SIZE)
+      const ringSliced = newRing.slice(0, PAGE_SIZE)
+      const liveSliced = newLive.slice(0, PAGE_SIZE)
+
+      setWallpapers(prev => append ? [...prev, ...wallSliced] : wallSliced)
+      setRingtones(prev => append ? [...prev, ...ringSliced] : ringSliced)
+      setLives(prev => append ? [...prev, ...liveSliced] : liveSliced)
     } finally {
       setLoading(false); setLoadingMore(false)
     }
-  }, [query, type, sort, categorySlug, wallPage, ringPage, livePage])
+  }, [query, type, sort, categoryId, wallPage, ringPage, livePage])
 
   // Debounced search on filter change
   useEffect(() => {
     const t = setTimeout(() => fetchResults(query), 350)
     return () => clearTimeout(t)
-  }, [query, type, sort, categorySlug]) // eslint-disable-line
+  }, [query, type, sort, categoryId]) // eslint-disable-line
 
   const handleLoadMore = async () => {
     const nextWall = wallPage + 1
@@ -218,13 +222,13 @@ export default function SearchPage() {
           {/* Category filter — only for wallpapers tab */}
           {(type === 'wallpaper') && categories.length > 0 && (
             <select
-              value={categorySlug}
+              value={categoryId}
               onChange={e => setCategorySlug(e.target.value)}
               className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-600 cursor-pointer"
             >
               <option value="">All Categories</option>
               {categories.map(c => (
-                <option key={c.id} value={c.slug}>{c.name}</option>
+                <option key={c.id} value={String(c.id)}>{c.name}</option>
               ))}
             </select>
           )}
