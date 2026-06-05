@@ -11,6 +11,7 @@ import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
 import ShareButton from '@/components/ui/ShareButton'
 import WallpaperCard from '@/components/wallpapers/WallpaperCard'
+import PhoneMockup from '@/components/wallpapers/PhoneMockup'
 import type { Wallpaper } from '@/types'
 import type { CollectionInfo, CategoryInfo } from './page'
 
@@ -67,60 +68,33 @@ export default function WallpaperDetailClient({ wallpaper, related, collections 
 
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
           {/* Phone mockup */}
-          <div className="flex justify-center" onContextMenu={(e) => e.preventDefault()}>
-            <div className="relative w-full max-w-[270px] md:max-w-[300px]">
-              {/* Outer shell */}
-              <div className="relative bg-gray-900 rounded-[3rem] p-[10px] pb-[20px] pt-[14px] shadow-[0_30px_80px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.07)]">
-                {/* Silent switch — left */}
-                <div className="absolute -left-[3px] top-[14%] w-[3px] h-5 bg-gray-700 rounded-l-sm" />
-                {/* Volume up — left */}
-                <div className="absolute -left-[3px] top-[21%] w-[3px] h-8 bg-gray-700 rounded-l-sm" />
-                {/* Volume down — left */}
-                <div className="absolute -left-[3px] top-[31%] w-[3px] h-8 bg-gray-700 rounded-l-sm" />
-                {/* Power — right */}
-                <div className="absolute -right-[3px] top-[24%] w-[3px] h-11 bg-gray-700 rounded-r-sm" />
-
-                {/* Screen area */}
-                <div className="relative aspect-[9/16] rounded-[2.4rem] overflow-hidden bg-gray-800">
-                  {/* Dynamic Island */}
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 w-[72px] h-[26px] bg-black rounded-full" />
-
-                  {wallpaper.image_url ? (
-                    <Image
-                      src={wallpaper.image_url}
-                      alt={wallpaper.title}
-                      fill
-                      priority
-                      sizes="(max-width: 768px) 80vw, 40vw"
-                      className="object-cover"
-                      draggable={false}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <svg className="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                  )}
-
-                  {/* Premium badge — below Dynamic Island */}
-                  {wallpaper.is_premium && (
-                    <div className="absolute top-12 left-3 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
-                      Premium
-                    </div>
-                  )}
-                </div>
-
-                {/* Home indicator */}
-                <div className="flex justify-center mt-[10px]">
-                  <div className="w-[90px] h-[4px] bg-gray-600 rounded-full" />
-                </div>
+          <PhoneMockup>
+            {wallpaper.image_url ? (
+              <Image
+                src={wallpaper.image_url}
+                alt={wallpaper.title}
+                fill
+                priority
+                sizes="(max-width: 768px) 80vw, 40vw"
+                className="object-cover"
+                draggable={false}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <svg className="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
               </div>
-            </div>
-          </div>
+            )}
+            {wallpaper.is_premium && (
+              <div className="absolute top-10 left-3 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                Premium
+              </div>
+            )}
+          </PhoneMockup>
 
           {/* Info */}
           <div className="flex flex-col justify-between py-2">

@@ -9,6 +9,7 @@ import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
 import ShareButton from '@/components/ui/ShareButton'
+import PhoneMockup from '@/components/wallpapers/PhoneMockup'
 import type { LiveWallpaper } from '@/types'
 
 interface Props {
@@ -87,8 +88,8 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
         </nav>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Video preview */}
-          <div className="relative aspect-[9/16] md:max-h-[70vh] w-full mx-auto rounded-2xl overflow-hidden bg-gray-800 shadow-2xl" onContextMenu={(e) => e.preventDefault()}>
+          {/* Phone mockup */}
+          <PhoneMockup>
             <video
               src={lw.video_url ?? undefined}
               poster={lw.thumbnail_url || undefined}
@@ -96,9 +97,10 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
               className="absolute inset-0 w-full h-full object-cover"
             />
             {lw.thumbnail_url && (
-              <Image src={lw.thumbnail_url} alt={lw.title} fill priority sizes="(max-width: 768px) 100vw, 50vw" className="object-cover -z-10" />
+              <Image src={lw.thumbnail_url} alt={lw.title} fill priority
+                     sizes="(max-width: 768px) 80vw, 40vw" className="object-cover -z-10" />
             )}
-          </div>
+          </PhoneMockup>
 
           {/* Info */}
           <div className="flex flex-col justify-between py-2">
