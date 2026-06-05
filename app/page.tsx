@@ -65,7 +65,7 @@ async function getHomepageData() {
       .eq('is_active', true).eq('is_published', true)
       .order('downloads_count', { ascending: false }).limit(6),
     // Categories
-    supabase.from('categories').select('id, name, slug, cover_image_url')
+    supabase.from('categories').select('id, name, slug, preview_image, preview_thumbnail')
       .eq('is_active', true).order('sort_order', { ascending: true }).limit(8),
     // Counts
     supabase.from('wallpapers').select('id', { count: 'estimated', head: true }).eq('is_active', true),
@@ -160,8 +160,8 @@ export default async function HomePage() {
                   href={`/category/${cat.slug}`}
                   className="group relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-800 hover:scale-[1.02] transition-transform"
                 >
-                  {cat.cover_image_url ? (
-                    <Image src={cat.cover_image_url} alt={cat.name} fill sizes="25vw" className="object-cover" />
+                  {(cat.preview_thumbnail || cat.preview_image) ? (
+                    <Image src={cat.preview_thumbnail || cat.preview_image} alt={cat.name} fill sizes="25vw" className="object-cover" />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800" />
                   )}
