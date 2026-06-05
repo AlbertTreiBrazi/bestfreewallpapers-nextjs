@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import WallpaperCard from '@/components/wallpapers/WallpaperCard'
 import HomeRingtoneCard from '@/components/home/HomeRingtoneCard'
@@ -29,8 +30,9 @@ interface Category { id: number; name: string; slug: string }
 
 const POPULAR_TAGS = ['aesthetic', 'dark', 'anime', 'nature', 'minimalist', 'space', 'flowers', 'cars', 'abstract', 'cute']
 
-export default function SearchPage() {
-  const [query, setQuery]           = useState('')
+function SearchPageInner() {
+  const searchParams = useSearchParams()
+  const [query, setQuery]           = useState(searchParams.get('q') || '')
   const [type, setType]             = useState<ContentType>('all')
   const [sort, setSort]             = useState<SortType>('popular')
   const [categoryId, setCategoryId] = useState('')
@@ -349,5 +351,17 @@ export default function SearchPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="w-full h-14 bg-gray-800 rounded-xl animate-pulse mb-6" />
+      </div>
+    }>
+      <SearchPageInner />
+    </Suspense>
   )
 }
