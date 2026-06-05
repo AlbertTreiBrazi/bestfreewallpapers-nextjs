@@ -24,11 +24,16 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      - name: Debug environment
         run: |
-          node --version
-          npm --version
-          npm ci
+          echo "Node: $(node --version)"
+          echo "npm: $(npm --version)"
+          echo "pwd: $(pwd)"
+          ls -la | head -20
+          echo "package-lock exists: $(test -f package-lock.json && echo YES || echo NO)"
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Typecheck
         run: npm run typecheck
