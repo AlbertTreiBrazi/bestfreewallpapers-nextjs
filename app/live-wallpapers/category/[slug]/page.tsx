@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
@@ -14,16 +13,17 @@ interface NavCategory { id: number; name: string; slug: string }
 
 interface Props { params: Promise<{ slug: string }> }
 
-async function getCategory(slug: string): Promise<LiveCategory | null> {
+async function getCategory(slug: string): Promise<LiveCategory> {
   const supabase = createServerSupabaseClient()
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('live_wallpaper_categories')
     .select('*')
     .eq('slug', slug)
     .eq('is_active', true)
-    .single()
-  if (error) return null
-  return data as LiveCategory | null
+    .maybeSingle()
+  if (data) return data as LiveCategory
+  const name = slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  return { id: 0, name, slug, description: null, preview_image: null, seo_title: null, seo_description: null }
 }
 
 async function getWallpapers(categorySlug: string): Promise<LiveWallpaper[]> {
@@ -52,8 +52,6 @@ async function getAllCategories(): Promise<NavCategory[]> {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const cat = await getCategory(slug)
-  if (!cat) return { title: 'Category not found' }
-
   const title = cat.seo_title || `${cat.name} Live Wallpapers — Free Animated Wallpapers`
   const description = cat.seo_description || cat.description ||
     `Download free ${cat.name} live wallpapers for iPhone and Android. Animated MP4 wallpapers — no registration required.`
@@ -79,7 +77,6 @@ export default async function LiveCategoryPage({ params }: Props) {
     getWallpapers(slug),
     getAllCategories(),
   ])
-  if (!cat) notFound()
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

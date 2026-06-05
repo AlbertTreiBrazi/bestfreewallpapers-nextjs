@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
@@ -9,16 +8,17 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-async function getCategory(slug: string): Promise<RingtoneCategory | null> {
+async function getCategory(slug: string): Promise<RingtoneCategory> {
   const supabase = createServerSupabaseClient()
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('ringtone_categories')
     .select('*')
     .eq('slug', slug)
     .eq('is_active', true)
-    .single()
-  if (error) return null
-  return data as RingtoneCategory | null
+    .maybeSingle()
+  if (data) return data as RingtoneCategory
+  const name = slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  return { id: 0, name, slug, description: null, preview_image: null, is_active: true, sort_order: 0, seo_title: null, seo_description: null }
 }
 
 async function getRingtones(categorySlug: string): Promise<Ringtone[]> {
@@ -50,8 +50,6 @@ async function getRingtones(categorySlug: string): Promise<Ringtone[]> {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const cat = await getCategory(slug)
-  if (!cat) return { title: 'Category not found' }
-
   const title = cat.seo_title || `${cat.name} Ringtones — Free Download for iPhone & Android`
   const description = cat.seo_description || cat.description ||
     `Download free ${cat.name} ringtones for iPhone and Android. High quality MP3 and M4R ringtones — no registration required.`
@@ -80,8 +78,6 @@ function formatDuration(seconds: number): string {
 export default async function RingtoneCategoryPage({ params }: Props) {
   const { slug } = await params
   const cat = await getCategory(slug)
-  if (!cat) notFound()
-
   const ringtones = await getRingtones(slug)
 
   const structuredData = {

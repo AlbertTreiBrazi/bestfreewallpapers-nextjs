@@ -149,11 +149,16 @@ export default function LiveWallpapersPage() {
 
   useEffect(() => {
     supabase
-      .from('live_wallpaper_categories')
-      .select('id, name, slug')
+      .from('live_wallpapers')
+      .select('category')
       .eq('is_active', true)
-      .order('sort_order', { ascending: true })
-      .then(({ data }) => setCategories((data || []) as LiveCategory[]))
+      .eq('is_published', true)
+      .not('category', 'is', null)
+      .limit(200)
+      .then(({ data }) => {
+        const unique = [...new Set((data || []).map((d: any) => d.category).filter(Boolean))]
+        setCategories(unique.map((name: string, i: number) => ({ id: i, name, slug: name })))
+      })
   }, [])
 
   useEffect(() => {

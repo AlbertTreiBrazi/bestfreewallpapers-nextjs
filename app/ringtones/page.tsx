@@ -161,11 +161,27 @@ export default function RingtonesPage() {
 
   useEffect(() => {
     supabase
-      .from('ringtone_categories')
-      .select('id, name, slug, preview_image')
+      .from('ringtones')
+      .select('tags')
       .eq('is_active', true)
-      .order('sort_order', { ascending: true })
-      .then(({ data }) => setCategories((data || []) as RingtoneCategory[]))
+      .eq('is_published', true)
+      .limit(300)
+      .then(({ data }) => {
+        const allTags = (data || []).flatMap((r: any) => r.tags || [])
+        const unique = [...new Set(allTags)].filter(Boolean)
+        setCategories(unique.map((name: string) => ({
+          id: 0,
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          slug: name,
+          description: null,
+          preview_image: null,
+          is_active: true,
+          sort_order: 0,
+          seo_title: null,
+          seo_description: null,
+          meta_keywords: null,
+        })))
+      })
   }, [])
 
   useEffect(() => {
