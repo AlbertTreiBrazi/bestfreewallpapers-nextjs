@@ -28,12 +28,14 @@ async function getCategory(slug: string): Promise<LiveCategory> {
 
 async function getWallpapers(categorySlug: string): Promise<LiveWallpaper[]> {
   const supabase = createServerSupabaseClient()
+  // slug is kebab-case ("animated-nature"); DB stores with spaces ("animated nature")
+  const category = categorySlug.replace(/-/g, ' ')
   const { data } = await supabase
     .from('live_wallpapers')
     .select('id, title, slug, thumbnail_url, video_url, downloads_count, is_premium, duration_seconds, is_active, is_published, views_count, category, tags, description, created_at, updated_at')
     .eq('is_active', true)
     .eq('is_published', true)
-    .eq('category', categorySlug)
+    .eq('category', category)
     .order('downloads_count', { ascending: false })
     .limit(48)
   return (data || []) as LiveWallpaper[]

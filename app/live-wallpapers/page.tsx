@@ -157,7 +157,11 @@ export default function LiveWallpapersPage() {
       .limit(200)
       .then(({ data }) => {
         const unique = [...new Set((data || []).map((d: any) => d.category).filter(Boolean))]
-        setCategories(unique.map((name: string, i: number) => ({ id: i, name, slug: name })))
+        setCategories(unique.map((name: string, i: number) => ({
+          id: i,
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          slug: name.toLowerCase().replace(/\s+/g, '-'),
+        })))
       })
   }, [])
 
