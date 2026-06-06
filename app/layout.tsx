@@ -5,6 +5,8 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { AuthProvider } from '@/contexts/AuthContext'
 import ScrollToTop from '@/components/ui/ScrollToTop'
+import ConsentModeInit from '@/components/consent/ConsentModeInit'
+import CookieConsent from '@/components/consent/CookieConsent'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://bestfreewallpapers.com'),
@@ -33,6 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#15803d" />
+        {/* Consent Mode v2 defaults — MUST load before any AdSense/GA script */}
+        <ConsentModeInit />
       </head>
       <body className="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
         <AuthProvider>
@@ -40,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1">{children}</main>
           <Footer />
           <ScrollToTop />
+          <CookieConsent />
           <Toaster position="bottom-right" toastOptions={{ style: { background: '#1f2937', color: '#f9fafb', border: '1px solid #374151' } }} />
         </AuthProvider>
       </body>
