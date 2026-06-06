@@ -16,7 +16,7 @@ async function getLiveWallpaper(slug: string): Promise<LiveWallpaper | null> {
 
 async function getRelated(currentId: number): Promise<LiveWallpaper[]> {
   const supabase = createServerSupabaseClient()
-  const { data } = await supabase.from('live_wallpapers').select('id, title, slug, thumbnail_url, is_premium, video_url, downloads_count, views_count, category, duration_seconds, tags, description, is_active, is_published, created_at, updated_at').eq('is_active', true).eq('is_published', true).neq('id', currentId).limit(6)
+  const { data } = await supabase.from('live_wallpapers').select('id, title, slug, thumbnail_url, is_premium, video_url, downloads_count, views_count, category, duration_seconds, tags, description, is_active, is_published, created_at, updated_at').eq('is_active', true).eq('is_published', true).neq('id', currentId).order('downloads_count', { ascending: false }).limit(6)
   return (data || []) as LiveWallpaper[]
 }
 

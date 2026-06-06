@@ -16,7 +16,7 @@ async function getRingtone(slug: string): Promise<Ringtone | null> {
 
 async function getRelated(currentId: number): Promise<Ringtone[]> {
   const supabase = createServerSupabaseClient()
-  const { data } = await supabase.from('ringtones').select('id, title, slug, cover_image_url, duration_seconds, is_premium, audio_url, downloads_count, file_size_bytes, tags, m4r_url, plays_count, creator_name, seo_title, seo_description, meta_keywords, is_active, is_published, created_at, updated_at, description').eq('is_active', true).eq('is_published', true).neq('id', currentId).limit(5)
+  const { data } = await supabase.from('ringtones').select('id, title, slug, cover_image_url, duration_seconds, is_premium, audio_url, downloads_count, file_size_bytes, tags, m4r_url, plays_count, creator_name, seo_title, seo_description, meta_keywords, is_active, is_published, created_at, updated_at, description').eq('is_active', true).eq('is_published', true).neq('id', currentId).order('downloads_count', { ascending: false }).limit(5)
   return (data || []) as Ringtone[]
 }
 
