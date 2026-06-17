@@ -1,6 +1,5 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
 import { CfImage } from '@/components/ui/CfImage'
 import { createServerSupabaseClient } from '@/lib/supabase'
 import HomeHero from '@/components/home/HomeHero'

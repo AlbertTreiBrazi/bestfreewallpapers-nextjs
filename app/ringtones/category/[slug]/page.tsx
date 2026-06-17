@@ -1,6 +1,5 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
 import { CfImage } from '@/components/ui/CfImage'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
 import type { Ringtone, RingtoneCategory } from '@/types'
