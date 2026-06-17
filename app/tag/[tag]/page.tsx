@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import { cfLoader } from '@/lib/cloudflare-loader'
+import { CfImage } from '@/components/ui/CfImage'
 import Link from 'next/link'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
 import type { Wallpaper, LiveWallpaper, Ringtone } from '@/types'
@@ -185,8 +185,7 @@ export default async function TagPage({ params }: Props) {
               <Link key={r.id} href={`/ringtone/${r.slug}`} className="group bg-gray-800 hover:bg-gray-750 rounded-xl overflow-hidden border border-gray-700 hover:border-gray-600 transition-all block">
                 <div className="relative w-full aspect-square bg-gray-700">
                   {r.cover_image_url ? (
-                    <Image
-                      loader={cfLoader}
+                    <CfImage
                       src={r.cover_image_url}
                       alt={r.title}
                       fill

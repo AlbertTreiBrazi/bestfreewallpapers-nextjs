@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { cfLoader } from '@/lib/cloudflare-loader'
+import { CfImage } from '@/components/ui/CfImage'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
 import type { Wallpaper } from '@/types'
 
@@ -127,7 +127,7 @@ export default async function CollectionSlugPage({ params }: Props) {
   return (
     <>
       <div className="relative overflow-hidden" style={bgStyle}>
-        {col.cover_image_url && <Image loader={cfLoader} src={col.cover_image_url} alt={col.name} fill priority sizes="100vw" className="object-cover opacity-20" />}
+        {col.cover_image_url && <CfImage src={col.cover_image_url} alt={col.name} fill priority sizes="100vw" className="object-cover opacity-20" />}
         <div className="relative max-w-7xl mx-auto px-4 py-14">
           <nav className="text-sm text-gray-400 mb-6 flex items-center gap-2">
             <Link href="/" className="hover:text-white">Home</Link><span>/</span>

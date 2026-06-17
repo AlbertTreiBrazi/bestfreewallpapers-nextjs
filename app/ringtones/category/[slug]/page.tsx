@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { cfLoader } from '@/lib/cloudflare-loader'
+import { CfImage } from '@/components/ui/CfImage'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
 import type { Ringtone, RingtoneCategory } from '@/types'
 
@@ -133,9 +133,8 @@ export default async function RingtoneCategoryPage({ params }: Props) {
             >
               <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-700">
                 {r.cover_image_url ? (
-                  <Image
-                    loader={cfLoader}
-                    src={r.cover_image_url}
+                  <CfImage
+                                        src={r.cover_image_url}
                     alt={r.title}
                     fill
                     sizes="20vw"
