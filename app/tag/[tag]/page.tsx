@@ -186,6 +186,7 @@ export default async function TagPage({ params }: Props) {
                 <div className="relative w-full aspect-square bg-gray-700">
                   {r.cover_image_url ? (
                     <Image
+                      loader={cfLoader}
                       src={r.cover_image_url}
                       alt={r.title}
                       fill

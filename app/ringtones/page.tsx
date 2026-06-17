@@ -53,6 +53,7 @@ function RingtoneCard({ ringtone }: { ringtone: Ringtone }) {
       <div className="relative w-full aspect-square bg-gray-700 overflow-hidden">
         {ringtone.cover_image_url ? (
           <Image
+            loader={cfLoader}
             src={ringtone.cover_image_url}
             alt={ringtone.title}
             fill
