@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { cfLoader } from '@/lib/cloudflare-loader'
 import type { Category } from '@/types'
 
 export default function CategoriesClient({ categories }: { categories: Category[] }) {
@@ -47,6 +48,7 @@ export default function CategoriesClient({ categories }: { categories: Category[
           >
             {(cat.preview_thumbnail || cat.preview_image) && (
               <Image
+                loader={cfLoader}
                 src={cat.preview_thumbnail || cat.preview_image!}
                 alt={cat.name}
                 fill

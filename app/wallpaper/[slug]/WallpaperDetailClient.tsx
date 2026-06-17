@@ -12,6 +12,7 @@ import FavoriteButton from '@/components/ui/FavoriteButton'
 import ShareButton from '@/components/ui/ShareButton'
 import WallpaperCard from '@/components/wallpapers/WallpaperCard'
 import PhoneMockup from '@/components/wallpapers/PhoneMockup'
+import { cfLoader } from '@/lib/cloudflare-loader'
 import type { Wallpaper } from '@/types'
 import type { CollectionInfo, CategoryInfo } from './page'
 
@@ -45,6 +46,7 @@ export default function WallpaperDetailClient({ wallpaper, related, collections 
       id: wallpaper.id,
       title: wallpaper.title,
       slug: wallpaper.slug,
+      // download_url points to the original full-quality file in R2
       url: wallpaper.download_url || wallpaper.image_url,
       type: 'wallpaper',
       is_premium: wallpaper.is_premium,
@@ -67,10 +69,11 @@ export default function WallpaperDetailClient({ wallpaper, related, collections 
         </nav>
 
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-          {/* Phone mockup */}
+          {/* Phone mockup — display uses CF loader (optimized WebP at screen size) */}
           <PhoneMockup>
             {wallpaper.image_url ? (
               <Image
+                loader={cfLoader}
                 src={wallpaper.image_url}
                 alt={wallpaper.title}
                 fill
@@ -160,7 +163,8 @@ export default function WallpaperDetailClient({ wallpaper, related, collections 
                       >
                         {col.cover_image_url ? (
                           <div className="relative w-6 h-6 rounded overflow-hidden flex-shrink-0">
-                            <Image src={col.cover_image_url} alt={col.name} fill sizes="24px" className="object-cover" />
+                            {/* Collection cover can be up to 1.69 MB — use CF loader */}
+                            <Image loader={cfLoader} src={col.cover_image_url} alt={col.name} fill sizes="24px" className="object-cover" />
                           </div>
                         ) : (
                           <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,7 +222,7 @@ export default function WallpaperDetailClient({ wallpaper, related, collections 
           </div>
         </div>
 
-        {/* Similar Wallpapers */}
+        {/* Similar Wallpapers — WallpaperCard already uses unoptimized */}
         {related.length > 0 && (
           <section className="mt-16">
             <div className="flex items-center justify-between mb-6">

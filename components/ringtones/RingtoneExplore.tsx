@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { Ringtone } from '@/types'
+import { cfLoader } from '@/lib/cloudflare-loader'
 
 function formatDuration(s: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
@@ -42,7 +43,6 @@ function ExploreCard({ ringtone, index, total, isActive, isNext, audioUnlocked, 
     return () => observer.disconnect()
   }, [stableOnBecomeActive])
 
-  // Play/pause driven by isActive + unlock state
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
@@ -90,7 +90,7 @@ function ExploreCard({ ringtone, index, total, isActive, isNext, audioUnlocked, 
       {/* Blurred background */}
       <div className="absolute inset-0 overflow-hidden">
         {ringtone.cover_image_url
-          ? <Image src={ringtone.cover_image_url} alt="" fill className="object-cover scale-125 blur-2xl opacity-25" />
+          ? <Image loader={cfLoader} src={ringtone.cover_image_url} alt="" fill className="object-cover scale-125 blur-2xl opacity-25" />
           : <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-950" />
         }
         <div className="absolute inset-0 bg-gray-950/65" />
@@ -105,7 +105,7 @@ function ExploreCard({ ringtone, index, total, isActive, isNext, audioUnlocked, 
         {/* Cover art */}
         <div className={`w-52 h-52 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 transition-transform duration-500 ${playing ? 'scale-105' : 'scale-100'}`}>
           {ringtone.cover_image_url
-            ? <Image src={ringtone.cover_image_url} alt={ringtone.title} width={208} height={208} className="object-cover w-full h-full" />
+            ? <Image loader={cfLoader} src={ringtone.cover_image_url} alt={ringtone.title} width={208} height={208} className="object-cover w-full h-full" />
             : <div className="w-full h-full bg-gray-800 flex items-center justify-center">
                 <svg className="w-16 h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
@@ -137,7 +137,6 @@ function ExploreCard({ ringtone, index, total, isActive, isNext, audioUnlocked, 
 
         {/* Controls */}
         <div className="flex items-center gap-6">
-          {/* Favorite */}
           <button
             onClick={handleFav}
             className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${faved ? 'bg-red-500 text-white' : 'bg-white/10 hover:bg-white/20 text-white'}`}
@@ -147,7 +146,6 @@ function ExploreCard({ ringtone, index, total, isActive, isNext, audioUnlocked, 
             </svg>
           </button>
 
-          {/* Play / Pause */}
           <button
             onClick={handlePlayPause}
             className="w-16 h-16 bg-green-600 hover:bg-green-500 active:scale-95 rounded-full flex items-center justify-center shadow-xl transition-all"
@@ -158,7 +156,6 @@ function ExploreCard({ ringtone, index, total, isActive, isNext, audioUnlocked, 
             }
           </button>
 
-          {/* Download / detail page */}
           <Link
             href={`/ringtone/${ringtone.slug}`}
             className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
@@ -170,7 +167,6 @@ function ExploreCard({ ringtone, index, total, isActive, isNext, audioUnlocked, 
           </Link>
         </div>
 
-        {/* iOS hint — first card, audio not yet unlocked */}
         {!audioUnlocked && index === 0 && (
           <p className="text-gray-500 text-xs text-center animate-pulse mt-1">
             Tap ▶ to start · Swipe up for next
@@ -200,14 +196,12 @@ export default function RingtoneExplore({ ringtones, onClose }: Props) {
 
   const handleBecomeActive = useCallback((i: number) => setActiveIndex(i), [])
 
-  // Lock body scroll while open
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = prev }
   }, [])
 
-  // Close on Escape key
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -216,7 +210,6 @@ export default function RingtoneExplore({ ringtones, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 bg-gray-950">
-      {/* Close button */}
       <button
         onClick={onClose}
         className="absolute top-4 left-4 z-20 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-colors hover:bg-black/70"
@@ -227,13 +220,11 @@ export default function RingtoneExplore({ ringtones, onClose }: Props) {
         </svg>
       </button>
 
-      {/* Label top-right */}
       <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full">
         <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
         <span className="text-white text-xs font-medium">Explore</span>
       </div>
 
-      {/* Snap scroll container */}
       <div className="h-full overflow-y-scroll snap-y snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {ringtones.map((r, i) => (
           <ExploreCard

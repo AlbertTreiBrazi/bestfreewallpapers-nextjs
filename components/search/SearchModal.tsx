@@ -270,6 +270,7 @@ export default function SearchModal({ isOpen, onClose }: Props) {
                             fill
                             sizes="120px"
                             style={{ objectFit: 'cover' }}
+                            unoptimized
                           />
                         )}
                         <span style={{

@@ -77,6 +77,7 @@ export default function HomeLiveCard({ lw }: Props) {
           fill
           sizes="(max-width: 640px) 50vw, 16vw"
           className={`object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
+          unoptimized
         />
       )}
 

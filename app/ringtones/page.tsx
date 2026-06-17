@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { cfLoader } from '@/lib/cloudflare-loader'
 import { supabase } from '@/lib/supabase'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { Ringtone, RingtoneCategory } from '@/types'
@@ -291,7 +292,7 @@ export default function RingtonesPage() {
               >
                 {cat.preview_image && (
                   <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
-                    <Image src={cat.preview_image} alt={cat.name} width={20} height={20} className="object-cover w-full h-full" />
+                    <Image src={cat.preview_image} alt={cat.name} width={20} height={20} className="object-cover w-full h-full" unoptimized />
                   </div>
                 )}
                 <span>{cat.name}</span>

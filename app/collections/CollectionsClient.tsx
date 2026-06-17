@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { cfLoader } from '@/lib/cloudflare-loader'
 
 interface Collection {
   id: string
@@ -135,6 +136,7 @@ export default function CollectionsClient({ featured, regular }: Props) {
               >
                 {col.cover_image_url ? (
                   <Image
+                    loader={cfLoader}
                     src={col.cover_image_url}
                     alt={col.name}
                     fill
@@ -180,6 +182,7 @@ export default function CollectionsClient({ featured, regular }: Props) {
               >
                 {col.cover_image_url ? (
                   <Image
+                    loader={cfLoader}
                     src={col.cover_image_url}
                     alt={col.name}
                     fill

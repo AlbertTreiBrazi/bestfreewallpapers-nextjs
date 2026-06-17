@@ -32,9 +32,14 @@ export default function WallpaperCard({ id, title, slug, thumbnail_url, is_premi
   return (
     <Link href={`/wallpaper/${slug}`} className="group relative rounded-lg overflow-hidden bg-gray-800 aspect-[9/16] block" onContextMenu={(e) => e.preventDefault()}>
       {thumbnail_url ? (
-        <Image src={thumbnail_url} alt={title} fill
+        <Image
+          src={thumbnail_url}
+          alt={title}
+          fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-          className="object-cover group-hover:scale-105 transition-transform duration-300" />
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          unoptimized
+        />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
           <svg className="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

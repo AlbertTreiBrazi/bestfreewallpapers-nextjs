@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
+import { cfLoader } from '@/lib/cloudflare-loader'
 import Link from 'next/link'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
 import type { Wallpaper, LiveWallpaper, Ringtone } from '@/types'
@@ -117,6 +118,7 @@ export default async function TagPage({ params }: Props) {
                     alt={w.title}
                     fill
                     sizes="(max-width: 640px) 50vw, 16vw"
+                    unoptimized
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 )}
@@ -147,6 +149,7 @@ export default async function TagPage({ params }: Props) {
                     alt={lw.title}
                     fill
                     sizes="(max-width: 640px) 50vw, 16vw"
+                    unoptimized
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 )}

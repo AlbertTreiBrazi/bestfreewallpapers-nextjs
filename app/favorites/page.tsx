@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { cfLoader } from '@/lib/cloudflare-loader'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import AuthModal from '@/components/auth/AuthModal'
@@ -57,6 +58,7 @@ function FavoriteLiveCard({ lw }: { lw: FavoriteLive }) {
           alt={lw.title}
           fill
           sizes="16vw"
+          unoptimized
           className={`object-cover transition-opacity duration-300 ${playing ? 'opacity-0' : 'opacity-100'}`}
         />
       )}
@@ -202,7 +204,7 @@ export default function FavoritesPage() {
               : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                   {wallpapers.map((w) => (
                     <Link key={w.id} href={`/wallpaper/${w.slug}`} className="group relative rounded-lg overflow-hidden bg-gray-800 aspect-[9/16] block">
-                      {w.thumbnail_url && <Image src={w.thumbnail_url} alt={w.title} fill sizes="16vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />}
+                      {w.thumbnail_url && <Image src={w.thumbnail_url} alt={w.title} fill sizes="16vw" className="object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                       <p className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity">{w.title}</p>
                     </Link>
@@ -218,7 +220,7 @@ export default function FavoritesPage() {
                     <Link key={r.id} href={`/ringtone/${r.slug}`} className="group bg-gray-800 hover:bg-gray-750 rounded-xl p-3 flex flex-col gap-2 border border-gray-700 hover:border-gray-600 transition-colors">
                       <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-700">
                         {r.cover_image_url
-                          ? <Image src={r.cover_image_url} alt={r.title} fill sizes="20vw" className="object-cover" />
+                          ? <Image loader={cfLoader} src={r.cover_image_url} alt={r.title} fill sizes="20vw" className="object-cover" />
                           : <div className="w-full h-full flex items-center justify-center">
                               <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
                             </div>

@@ -59,19 +59,19 @@ function ExploreCard({ wallpaper, index, total, isActive: _isActive, onBecomeAct
     >
       {/* ── Desktop: blurred backdrop so black bars look nice ── */}
       <div className="hidden md:block absolute inset-0 pointer-events-none">
-        <Image src={imgSrc} alt="" fill sizes="100vw" className="object-cover scale-110 blur-3xl opacity-30" />
+        <Image src={imgSrc} alt="" fill sizes="100vw" className="object-cover scale-110 blur-3xl opacity-30" unoptimized />
         <div className="absolute inset-0 bg-black/55" />
       </div>
 
       {/* ── Mobile: full-bleed image ── */}
       <div className="md:hidden absolute inset-0">
-        <Image src={imgSrc} alt={wallpaper.title} fill priority={index < 2} sizes="100vw" className="object-cover" draggable={false} />
+        <Image src={imgSrc} alt={wallpaper.title} fill priority={index < 2} sizes="100vw" className="object-cover" draggable={false} unoptimized />
       </div>
 
       {/* ── Desktop: centered phone-width container ── */}
       <div className="hidden md:flex absolute inset-0 items-center justify-center">
         <div className="relative h-full" style={{ aspectRatio: '9/16', maxHeight: '100%', maxWidth: '440px' }}>
-          <Image src={imgSrc} alt={wallpaper.title} fill priority={index < 2} sizes="440px" className="object-cover rounded-2xl shadow-2xl" draggable={false} />
+          <Image src={imgSrc} alt={wallpaper.title} fill priority={index < 2} sizes="440px" className="object-cover rounded-2xl shadow-2xl" draggable={false} unoptimized />
         </div>
       </div>
 

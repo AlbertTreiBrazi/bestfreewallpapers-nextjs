@@ -24,7 +24,7 @@ function RelatedLiveCard({ w }: { w: LiveWallpaper }) {
   return (
     <Link key={w.id} href={`/live-wallpaper/${w.slug}`} className="group relative aspect-[9/16] rounded-lg overflow-hidden bg-gray-800 block">
       {w.thumbnail_url
-        ? <Image src={w.thumbnail_url} alt={w.title} fill sizes="16vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />
+        ? <Image src={w.thumbnail_url} alt={w.title} fill sizes="16vw" className="object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
         : <>
             <video
               ref={videoRef}
@@ -88,7 +88,7 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
         </nav>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Phone mockup */}
+          {/* Phone mockup — video is primary, thumbnail is poster/fallback */}
           <PhoneMockup>
             <video
               src={lw.video_url ?? undefined}
@@ -98,7 +98,7 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
             />
             {lw.thumbnail_url && (
               <Image src={lw.thumbnail_url} alt={lw.title} fill priority
-                     sizes="(max-width: 768px) 80vw, 40vw" className="object-cover -z-10" />
+                     sizes="(max-width: 768px) 80vw, 40vw" className="object-cover -z-10" unoptimized />
             )}
           </PhoneMockup>
 
@@ -150,7 +150,6 @@ export default function LiveWallpaperDetailClient({ lw, related }: Props) {
               )}
             </div>
 
-            {/* Download button — now with modal + timer */}
             <div className="space-y-3">
               <button
                 onClick={handleDownload}

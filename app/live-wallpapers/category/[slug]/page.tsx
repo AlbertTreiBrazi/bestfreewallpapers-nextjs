@@ -148,6 +148,7 @@ export default async function LiveCategoryPage({ params }: Props) {
                   fill
                   sizes="(max-width: 640px) 50vw, 16vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  unoptimized
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">

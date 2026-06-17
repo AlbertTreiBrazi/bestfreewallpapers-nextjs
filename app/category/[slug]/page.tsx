@@ -119,6 +119,7 @@ export default async function CategoryPage({ params }: Props) {
                   fill
                   sizes="(max-width: 640px) 50vw, 16vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
+                unoptimized
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

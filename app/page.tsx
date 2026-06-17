@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { cfLoader } from '@/lib/cloudflare-loader'
 import { createServerSupabaseClient } from '@/lib/supabase'
 import HomeHero from '@/components/home/HomeHero'
 import HomeRingtoneCard from '@/components/home/HomeRingtoneCard'
@@ -161,7 +162,7 @@ export default async function HomePage() {
                   className="group relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-800 hover:scale-[1.02] transition-transform"
                 >
                   {(cat.preview_thumbnail || cat.preview_image) ? (
-                    <Image src={cat.preview_thumbnail || cat.preview_image} alt={cat.name} fill sizes="25vw" className="object-cover" />
+                    <Image loader={cfLoader} src={cat.preview_thumbnail || cat.preview_image} alt={cat.name} fill sizes="25vw" className="object-cover" />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800" />
                   )}

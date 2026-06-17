@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useFavorites } from '@/hooks/useFavorites'
+import { cfLoader } from '@/lib/cloudflare-loader'
 
 interface Props {
   ringtone: {
@@ -56,6 +57,7 @@ export default function HomeRingtoneCard({ ringtone }: Props) {
       <div className="relative aspect-square bg-gray-700">
         {ringtone.cover_image_url ? (
           <Image
+            loader={cfLoader}
             src={ringtone.cover_image_url}
             alt={ringtone.title}
             fill

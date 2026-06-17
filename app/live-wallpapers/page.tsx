@@ -67,6 +67,7 @@ function LiveWallpaperCard({ lw }: { lw: LiveWallpaper }) {
           alt={lw.title}
           fill
           sizes="(max-width: 640px) 50vw, 16vw"
+          unoptimized
           className={`object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
         />
       )}

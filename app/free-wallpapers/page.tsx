@@ -111,6 +111,7 @@ export default async function FreeWallpapersPage() {
                   alt={w.title}
                   fill
                   sizes="(max-width: 640px) 50vw, 16vw"
+                  unoptimized
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               )}

@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { cfLoader } from '@/lib/cloudflare-loader'
 import { createServerSupabaseClient, SITE_URL } from '@/lib/supabase'
 import type { Wallpaper } from '@/types'
 
@@ -82,7 +83,7 @@ const WallpaperGrid = ({ wallpapers }: { wallpapers: Wallpaper[] }) => (
   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
     {wallpapers.map((w) => (
       <Link key={w.id} href={`/wallpaper/${w.slug}`} className="group relative rounded-lg overflow-hidden bg-gray-800 aspect-[9/16] block">
-        {w.thumbnail_url && <Image src={w.thumbnail_url} alt={w.title} fill sizes="16vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />}
+        {w.thumbnail_url && <Image src={w.thumbnail_url} alt={w.title} fill sizes="16vw" className="object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <p className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity">{w.title}</p>
         {w.is_premium && <span className="absolute top-2 right-2 bg-yellow-500 text-black text-xs px-1.5 py-0.5 rounded font-medium">PRO</span>}
@@ -126,7 +127,7 @@ export default async function CollectionSlugPage({ params }: Props) {
   return (
     <>
       <div className="relative overflow-hidden" style={bgStyle}>
-        {col.cover_image_url && <Image src={col.cover_image_url} alt={col.name} fill priority sizes="100vw" className="object-cover opacity-20" />}
+        {col.cover_image_url && <Image loader={cfLoader} src={col.cover_image_url} alt={col.name} fill priority sizes="100vw" className="object-cover opacity-20" />}
         <div className="relative max-w-7xl mx-auto px-4 py-14">
           <nav className="text-sm text-gray-400 mb-6 flex items-center gap-2">
             <Link href="/" className="hover:text-white">Home</Link><span>/</span>

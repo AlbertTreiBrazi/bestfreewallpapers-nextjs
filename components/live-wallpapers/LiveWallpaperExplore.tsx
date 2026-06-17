@@ -15,8 +15,8 @@ interface CardProps {
 }
 
 function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) {
-  const videoRef = useRef<HTMLVideoElement>(null)         // mobile video
-  const videoRefDesktop = useRef<HTMLVideoElement>(null)  // desktop phone-container video
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRefDesktop = useRef<HTMLVideoElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
   const { isFavorite, toggleFavorite } = useFavorites()
   const faved = isFavorite(lw.id, 'live')
@@ -34,7 +34,6 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
     return () => observer.disconnect()
   }, [index, onBecomeActive])
 
-  // Auto-play when card is active, pause+reset when leaving — controls both mobile & desktop video
   useEffect(() => {
     const videos = [videoRef.current, videoRefDesktop.current].filter(Boolean) as HTMLVideoElement[]
     if (isActive && !paused) {
@@ -73,10 +72,10 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
       className="snap-start shrink-0 w-full h-[100dvh] relative overflow-hidden bg-black"
       onClick={handleTap}
     >
-      {/* ── Desktop: blurred backdrop so letterboxing looks nice ── */}
+      {/* ── Desktop: blurred backdrop ── */}
       {thumbSrc && (
         <div className="hidden md:block absolute inset-0 pointer-events-none">
-          <Image src={thumbSrc} alt="" fill sizes="100vw" className="object-cover scale-110 blur-3xl opacity-30" />
+          <Image src={thumbSrc} alt="" fill sizes="100vw" className="object-cover scale-110 blur-3xl opacity-30" unoptimized />
           <div className="absolute inset-0 bg-black/55" />
         </div>
       )}
@@ -90,6 +89,7 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
             fill
             priority={index === 0}
             className={`object-cover transition-opacity duration-300 ${videoReady ? 'opacity-0' : 'opacity-100'}`}
+            unoptimized
           />
         </div>
       )}
@@ -106,13 +106,12 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
         onCanPlay={() => setVideoReady(true)}
       />
 
-      {/* ── Desktop: centered phone-width container (9:16, max 440px) ── */}
+      {/* ── Desktop: centered phone-width container ── */}
       <div className="hidden md:flex absolute inset-0 items-center justify-center">
         <div
           className="relative h-full overflow-hidden rounded-2xl shadow-2xl"
           style={{ aspectRatio: '9/16', maxHeight: '100%', maxWidth: '440px' }}
         >
-          {/* Thumbnail fades out once desktop video is ready */}
           {thumbSrc && (
             <Image
               src={thumbSrc}
@@ -121,9 +120,9 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
               sizes="440px"
               priority={index < 2}
               className={`object-cover transition-opacity duration-300 ${videoReady ? 'opacity-0' : 'opacity-100'}`}
+              unoptimized
             />
           )}
-          {/* Desktop video fills phone container */}
           <video
             ref={videoRefDesktop}
             src={lw.video_url ?? undefined}
@@ -133,9 +132,7 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
             playsInline
             preload="none"
           />
-          {/* Vignette inside phone container */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent via-40% to-black/70 pointer-events-none" />
-          {/* Paused overlay inside phone container on desktop */}
           {paused && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="w-16 h-16 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
@@ -148,10 +145,8 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
         </div>
       </div>
 
-      {/* Dark vignette — mobile only (desktop vignette is inside phone container) */}
       <div className="md:hidden absolute inset-0 bg-gradient-to-b from-black/30 via-transparent via-40% to-black/70 pointer-events-none" />
 
-      {/* Paused overlay — mobile only */}
       {paused && (
         <div className="md:hidden absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-16 h-16 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
@@ -162,16 +157,13 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
         </div>
       )}
 
-      {/* Position indicator — top right */}
       <div className="absolute top-4 right-4 z-10 pointer-events-none">
         <span className="text-white/70 text-xs bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-full">
           {index + 1} / {total}
         </span>
       </div>
 
-      {/* TikTok-style right sidebar actions */}
       <div className="absolute right-3 bottom-28 flex flex-col items-center gap-5 z-10">
-        {/* Favorite */}
         <button onClick={handleFav} className="flex flex-col items-center gap-1">
           <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-colors ${faved ? 'bg-red-500' : 'bg-black/50 backdrop-blur-sm'}`}>
             <svg className="w-6 h-6 text-white" fill={faved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -181,7 +173,6 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
           <span className="text-white text-xs drop-shadow">{faved ? 'Saved' : 'Save'}</span>
         </button>
 
-        {/* Download — opens detail page */}
         <Link
           href={`/live-wallpaper/${lw.slug}`}
           onClick={(e) => e.stopPropagation()}
@@ -196,7 +187,6 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
         </Link>
       </div>
 
-      {/* Bottom info overlay */}
       <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none z-10 md:hidden">
         <h2 className="text-white font-bold text-base line-clamp-2 leading-snug pr-16 drop-shadow">
           {lw.title}
@@ -214,7 +204,6 @@ function ExploreCard({ lw, index, total, isActive, onBecomeActive }: CardProps) 
         )}
       </div>
 
-      {/* Bottom info overlay — desktop (below phone container, above blurred bg) */}
       <div className="hidden md:flex absolute bottom-6 left-0 right-0 justify-center z-10 pointer-events-none">
         <div style={{ maxWidth: '440px', width: '100%' }} className="px-3">
           <h2 className="text-white font-bold text-base line-clamp-1 drop-shadow-lg">{lw.title}</h2>
@@ -237,14 +226,12 @@ export default function LiveWallpaperExplore({ wallpapers, onClose }: Props) {
 
   const handleBecomeActive = useCallback((i: number) => setActiveIndex(i), [])
 
-  // Lock body scroll
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = prev }
   }, [])
 
-  // Escape key closes
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -253,7 +240,6 @@ export default function LiveWallpaperExplore({ wallpapers, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
-      {/* Close button */}
       <button
         onClick={onClose}
         className="absolute top-4 left-4 z-20 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors"
@@ -264,13 +250,11 @@ export default function LiveWallpaperExplore({ wallpapers, onClose }: Props) {
         </svg>
       </button>
 
-      {/* Explore label */}
       <div className="absolute top-4 left-16 z-20 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full pointer-events-none">
         <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
         <span className="text-white text-xs font-medium">Live</span>
       </div>
 
-      {/* Snap scroll container */}
       <div className="h-full overflow-y-scroll snap-y snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {wallpapers.map((lw, i) => (
           <ExploreCard

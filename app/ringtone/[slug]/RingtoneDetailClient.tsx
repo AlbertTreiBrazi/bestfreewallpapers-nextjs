@@ -9,6 +9,7 @@ import DownloadModal from '@/components/download/DownloadModal'
 import AuthModal from '@/components/auth/AuthModal'
 import FavoriteButton from '@/components/ui/FavoriteButton'
 import ShareButton from '@/components/ui/ShareButton'
+import { cfLoader } from '@/lib/cloudflare-loader'
 import type { Ringtone } from '@/types'
 
 interface Props {
@@ -68,10 +69,10 @@ export default function RingtoneDetailClient({ ringtone, related }: Props) {
 
         <div className="bg-gray-800 rounded-2xl p-6 md:p-8">
           <div className="flex flex-col sm:flex-row gap-6">
-            {/* Cover */}
+            {/* Cover — CF loader (could be a large uploaded image) */}
             <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-xl overflow-hidden bg-gray-700 flex-shrink-0 mx-auto sm:mx-0">
               {ringtone.cover_image_url ? (
-                <Image src={ringtone.cover_image_url} alt={ringtone.title} fill priority sizes="160px" className="object-cover" />
+                <Image loader={cfLoader} src={ringtone.cover_image_url} alt={ringtone.title} fill priority sizes="160px" className="object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <svg className="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,14 +109,14 @@ export default function RingtoneDetailClient({ ringtone, related }: Props) {
             </div>
           </div>
 
-          {/* Audio player */}
+          {/* Audio player — untouched */}
           <div className="mt-6">
             <audio controls className="w-full" preload="metadata">
               <source src={ringtone.audio_url} type="audio/mpeg" />
             </audio>
           </div>
 
-          {/* Download buttons — now with modal + timer */}
+          {/* Download buttons */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onClick={handleDownloadMP3}
@@ -138,7 +139,7 @@ export default function RingtoneDetailClient({ ringtone, related }: Props) {
           </p>
         </div>
 
-        {/* Related */}
+        {/* Related — CF loader on cover_image_url */}
         {related.length > 0 && (
           <section className="mt-12">
             <h2 className="text-xl font-semibold text-white mb-5">More Ringtones</h2>
@@ -147,7 +148,7 @@ export default function RingtoneDetailClient({ ringtone, related }: Props) {
                 <Link key={r.id} href={`/ringtone/${r.slug}`} className="group bg-gray-800 hover:bg-gray-750 rounded-lg p-3 flex flex-col items-center gap-2 transition-colors border border-gray-700 hover:border-gray-600">
                   <div className="relative w-full aspect-square rounded-md overflow-hidden bg-gray-700">
                     {r.cover_image_url ? (
-                      <Image src={r.cover_image_url} alt={r.title} fill sizes="20vw" className="object-cover" />
+                      <Image loader={cfLoader} src={r.cover_image_url} alt={r.title} fill sizes="20vw" className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
